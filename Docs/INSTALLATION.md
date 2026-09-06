@@ -10,10 +10,12 @@ Talk is a macOS Swift package. Both apps need the SDK; a provider exposes a cont
 | --- | --- |
 | Swift | 6.2 or later; Swift 6 language mode |
 | Toolchain tested | Xcode 26.2 / Swift 6.2.3 |
-| Declared deployment target | macOS 13 or later |
+| Declared deployment target | macOS 12.4 or later |
 | Native environment tested | macOS 15.7.9, Apple silicon |
 | Persistent pairing | Apple-signed, correctly provisioned macOS apps with app-specific Keychain access |
 | Dependencies | Apple frameworks; no third-party runtime packages |
+
+The deployment target is the oldest OS that can run your app, not the OS required to build it. Keep a Swift 6.2+ build toolchain on a supported newer Mac; Xcode 26.2 requires macOS 15.6 or later. See [Apple’s Xcode requirements](https://developer.apple.com/xcode/system-requirements/). Actual macOS 12.4 runtime validation remains pending. The bundled Xcode 26.2 test harness raises test targets to macOS 14; this does not raise the SDK or example-app minimum. Use the example apps and standalone probes for runtime checks on Monterey.
 
 This is a development preview, with no stable version tag. Use `main` to evaluate current source, or replace the branch requirement with `revision: "<reviewed-commit-sha>"` to pin a reviewed commit. Commit your application's resolved dependency state. See [qualification](BETA-READINESS.md) for what remains unverified, including distribution delivery and other OS/hardware combinations.
 
@@ -37,7 +39,7 @@ import PackageDescription
 
 let package = Package(
     name: "MyAppIntegration",
-    platforms: [.macOS(.v13)],
+    platforms: [.macOS("12.4")],
     products: [
         .library(name: "IntegrationContract", targets: ["IntegrationContract"])
     ],

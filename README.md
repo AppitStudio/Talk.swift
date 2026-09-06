@@ -8,7 +8,7 @@ Built for macOS developers adding integrations to their apps, and for coding age
 
 > **Beta — use with caution.** Talk still needs more testing and validation. APIs and behavior can change. Evaluate it with synthetic or noncritical data, and validate your actual signed apps before relying on an integration. This beta is not a production-readiness or security guarantee.
 
-The declared runtime minimum is macOS 13; current native validation covers macOS 15.7.9 on Apple silicon with Apple Development signing. Distribution signing, unrelated developer teams, additional platforms, and independent security review remain open. See [status and qualification](Docs/BETA-READINESS.md).
+The declared runtime minimum is **macOS 12.4**; actual Monterey runtime validation is pending. Current native validation covers macOS 15.7.9 on Apple silicon with Apple Development signing. Distribution signing, unrelated developer teams, additional platforms, and independent security review remain open. See [status and qualification](Docs/BETA-READINESS.md).
 
 ## What you get
 

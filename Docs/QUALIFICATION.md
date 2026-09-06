@@ -1,6 +1,8 @@
 # Native and security qualification — 6 September 2026
 
-The native example matrix is complete on the tested host. Security qualification has additional local evidence, but remains open for unrelated-team, distribution, certificate-change, and independent review. Real-app and broader platform qualification remain separate work. This source is published as a development preview.
+The current deployment minimum is macOS 12.4. Both architecture builds are checked, but actual Monterey runtime qualification remains open. Native matrix results below were recorded on macOS 15.7.9; they do not establish behavior on 12.4.
+
+The native example matrix below was completed before the macOS 12.4 scene update on the tested host. Security qualification has additional local evidence, but remains open for unrelated-team, distribution, certificate-change, and independent review. Real-app and broader platform qualification remain separate work. This source is published as a development preview.
 
 Host: macOS 15.7.9 arm64, Swift 6.2.3 / Xcode 26.2. This is a bounded implementation/validation pass, not an independent security audit or a claim that all vulnerabilities are absent.
 

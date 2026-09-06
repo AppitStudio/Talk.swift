@@ -57,7 +57,7 @@ struct ReadinessProbe {
               try FrameCodec.encode(TalkMessage(kind: .response, action: "echo", payload: response)).count == 65_540 else {
             throw Failure.frameSize
         }
-        let start = ContinuousClock.now
+        let start = clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW)
         var cycles = 0
         emit("pressure begin peers=8 retainedCalls=128 requestBodyBytes=65536 responseBodyBytes=65536 seconds=\(seconds)")
         repeat {
@@ -84,10 +84,10 @@ struct ReadinessProbe {
                         }
                     }
                     do {
-                        let waiting = ContinuousClock.now
+                        let waiting = clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW)
                         while await gate.count != 128 {
-                            guard waiting.duration(to: .now) < .seconds(10) else { throw Failure.gateCount }
-                            try await Task.sleep(for: .milliseconds(5))
+                            guard (clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW) - waiting) < UInt64(10) * 1_000_000_000 else { throw Failure.gateCount }
+                            try await Task.sleep(nanoseconds: 5_000_000)
                         }
                         if cycles.isMultiple(of: 10) { try memory("saturated") }
                         let excess = try TalkClient(port: port, credential: record.credential)
@@ -135,10 +135,10 @@ struct ReadinessProbe {
                 emit("pressure reliefControl=true releasedBytes=\(released)")
                 try memory("afterRelief")
             }
-        } while start.duration(to: .now) < .seconds(seconds)
+        } while (clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW) - start) < UInt64(seconds) * 1_000_000_000
         emit("pressure complete cycles=\(cycles) roundTrips=\(cycles * 128) rejectedExcessPeers=\(cycles)")
         emit("cooldown seconds=10 listeners=0")
-        try await Task.sleep(for: .seconds(10))
+        try await Task.sleep(nanoseconds: 10_000_000_000)
         try memory("cooldown")
     }
 
@@ -158,7 +158,7 @@ struct ReadinessProbe {
             var before = rusage()
             getrusage(RUSAGE_SELF, &before)
             emit("idle begin integrations=16 seconds=\(seconds) defaultIdleTimeout=300")
-            try await Task.sleep(for: .seconds(seconds))
+            try await Task.sleep(nanoseconds: UInt64(seconds) * 1_000_000_000)
             var after = rusage()
             getrusage(RUSAGE_SELF, &after)
             func micros(_ time: timeval) -> Int64 { Int64(time.tv_sec) * 1_000_000 + Int64(time.tv_usec) }
@@ -187,7 +187,7 @@ struct ReadinessProbe {
             throw error
         }
         emit("cooldown seconds=10 listeners=0")
-        try await Task.sleep(for: .seconds(10))
+        try await Task.sleep(nanoseconds: 10_000_000_000)
     }
 }
 

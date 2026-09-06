@@ -22,7 +22,7 @@ struct StorageRecoveryTests {
         let recovered = try await withDeadline(seconds: 5) {
             while true {
                 do { return try await store.reload() }
-                catch TalkError.credentialOperationPending { try await Task.sleep(for: .milliseconds(2)) }
+                catch TalkError.credentialOperationPending { try await Task.sleep(nanoseconds: 2_000_000) }
             }
         }
         #expect(recovered == [record])
@@ -46,7 +46,7 @@ struct StorageRecoveryTests {
         try await withDeadline(seconds: 5) {
             while true {
                 do { _ = try await operations.perform(key: "recovered") { nil }; return }
-                catch TalkError.credentialOperationPending { try await Task.sleep(for: .milliseconds(2)) }
+                catch TalkError.credentialOperationPending { try await Task.sleep(nanoseconds: 2_000_000) }
             }
         }
     }

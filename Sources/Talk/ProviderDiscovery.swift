@@ -33,15 +33,15 @@ public enum ProviderDiscovery {
                           read: (URL) throws -> Data = boundedRead) -> Candidate {
         // Bundle.infoDictionary can itself read an untrusted special file.
         // Use the same descriptor checks for both metadata resources.
-        let info = metadata ?? (try? boundedRead(url.appending(path: "Contents/Info.plist")))
+        let info = metadata ?? (try? boundedRead(url.appendingPathComponent("Contents/Info.plist", isDirectory: false)))
             .flatMap { try? PropertyListSerialization.propertyList(from: $0, format: nil) as? [String: Any] }
         var status: MetadataStatus = info == nil ? .unavailable : .missing
         var manifest: ProviderManifest?
         if let path = info?["TalkContract"] as? String {
             if path != "Contract.talk.json" { status = .invalid }
             else {
-                let resources = url.appending(path: "Contents/Resources").resolvingSymlinksInPath()
-                let file = resources.appending(path: path).resolvingSymlinksInPath()
+                let resources = url.appendingPathComponent("Contents/Resources", isDirectory: true).resolvingSymlinksInPath()
+                let file = resources.appendingPathComponent(path, isDirectory: false).resolvingSymlinksInPath()
                 if file.deletingLastPathComponent().path != resources.path { status = .invalid }
                 else {
                     do {

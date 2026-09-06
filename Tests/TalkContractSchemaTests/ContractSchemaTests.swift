@@ -7,7 +7,7 @@ struct ContractSchemaTests {
     private var fixture: Data {
         get throws {
             let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
-            return try Data(contentsOf: root.appending(path: "Examples/Shared/StudioContract/Contract.talk.json"))
+            return try Data(contentsOf: root.appendingPathComponent("Examples/Shared/StudioContract/Contract.talk.json"))
         }
     }
 

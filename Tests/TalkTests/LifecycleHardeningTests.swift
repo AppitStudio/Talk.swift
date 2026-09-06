@@ -41,7 +41,7 @@ struct LifecycleHardeningTests {
         let mutations = Count()
         let server = TalkServer(record: grant, actions: ["write": "write"]) { _, _ in
             began.yield(())
-            do { try await Task.sleep(for: .seconds(30)) }
+            do { try await Task.sleep(nanoseconds: 30_000_000_000) }
             catch { ended.yield(()); throw error }
             try Task.checkCancellation()
             await mutations.increment()
@@ -85,7 +85,7 @@ struct LifecycleHardeningTests {
         let grant = try record()
         let (cancelled, ended) = AsyncStream<Void>.makeStream()
         let server = TalkServer(record: grant, actions: ["write": "write"], handlerTimeout: 0.1) { _, _ in
-            do { try await Task.sleep(for: .seconds(30)); return .null }
+            do { try await Task.sleep(nanoseconds: 30_000_000_000); return .null }
             catch { ended.yield(()); throw error }
         }
         let client = try TalkClient(port: try await server.start(), credential: grant.credential)

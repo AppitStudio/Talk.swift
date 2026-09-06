@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 import Testing
 import StudioContract
@@ -18,7 +19,7 @@ struct SustainedLoadTests {
             let record = PairingRecord(credential: try PairingCredential(), providerBundleID: "dev.talk.synthetic", scopes: StudioAPI.scopes)
             try await provider.approve(record); records.append(record)
         }
-        let start = ContinuousClock.now
+        let start = clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW)
         var cycles = 0, calls = 0, events = 0, reconnects = 0, overflows = 0, revocations = 0
         var phase = "setup"
         do {
@@ -65,15 +66,15 @@ struct SustainedLoadTests {
                 try await provider.approve(replacement); records[0] = replacement
                 cycles += 1
                 if cycles % 5 == 0 { print("LOAD progress cycles=\(cycles) calls=\(calls) retained=\(await HandlerCapacity.shared.retained)") }
-            } while start.duration(to: .now) < .seconds(seconds)
+            } while (clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW) - start) < UInt64(seconds) * 1_000_000_000
         } catch { print("LOAD failure cycle=\(cycles) phase=\(phase) error=\(error) retained=\(await HandlerCapacity.shared.retained)"); await provider.stop(); throw error }
         for record in records { try await provider.revoke(record.credential.id) }
         #expect(await provider.integrations().isEmpty)
         await provider.stop()
         try await withDeadline(seconds: 5) {
-            while await HandlerCapacity.shared.retained != 0 { try await Task.sleep(for: .milliseconds(5)) }
+            while await HandlerCapacity.shared.retained != 0 { try await Task.sleep(nanoseconds: 5_000_000) }
         }
-        print("LOAD complete duration=\(start.duration(to: .now)) integrations=16 cycles=\(cycles) calls=\(calls) events=\(events) connections=\(reconnects) overflows=\(overflows) revocations=\(revocations) retained=0")
+        print("LOAD complete durationSeconds=\(Double(clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW) - start) / 1_000_000_000) integrations=16 cycles=\(cycles) calls=\(calls) events=\(events) connections=\(reconnects) overflows=\(overflows) revocations=\(revocations) retained=0")
     }
 
     @Test(.enabled(if: ProcessInfo.processInfo.environment["TALK_SATURATION"] == "1"), .timeLimit(.minutes(2)))
@@ -95,7 +96,7 @@ struct SustainedLoadTests {
                 for _ in 0..<8 { requests.append(Task { try await client.snapshot() }) }
             }
             try await withDeadline(seconds: 10) {
-                while await gate.count != 128 { try await Task.sleep(for: .milliseconds(5)) }
+                while await gate.count != 128 { try await Task.sleep(nanoseconds: 5_000_000) }
             }
             #expect(await HandlerCapacity.shared.retained == 128)
             await provider.stop()
@@ -116,7 +117,7 @@ struct SustainedLoadTests {
         for client in clients { await client.transport.close() }
         await provider.stop()
         try await withDeadline(seconds: 5) {
-            while await HandlerCapacity.shared.retained != 0 { try await Task.sleep(for: .milliseconds(5)) }
+            while await HandlerCapacity.shared.retained != 0 { try await Task.sleep(nanoseconds: 5_000_000) }
         }
         print("SATURATION handlers=128 integrations=16 afterStop=128 excess=busy afterRelease=0")
     }

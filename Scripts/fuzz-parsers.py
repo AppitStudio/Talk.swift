@@ -39,7 +39,7 @@ def main():
         (folder / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
     save()
     binary = folder / 'ParserFuzz'
-    result = subprocess.run(['xcrun', 'swiftc', '-parse-as-library', '-swift-version', '6', '-g', '-O',
+    result = subprocess.run(['xcrun', 'swiftc', '-target', f'{os.uname().machine}-apple-macosx12.4', '-parse-as-library', '-swift-version', '6', '-g', '-O',
                              '-sanitize=address', *[str(frozen / path.name) for path in files], '-o', str(binary)],
                             capture_output=True, text=True)
     (folder / 'build.log').write_text(result.stdout + result.stderr)

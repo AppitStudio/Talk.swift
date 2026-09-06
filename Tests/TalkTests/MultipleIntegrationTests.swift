@@ -88,7 +88,7 @@ struct MultipleIntegrationTests {
         let service = provider(MemoryIntegrations()) { action, payload in
             if action == StudioAPI.select, try payload.decode(SelectScene.self).id == "suspended" {
                 begin.yield(())
-                do { try await Task.sleep(for: .seconds(30)) }
+                do { try await Task.sleep(nanoseconds: 30_000_000_000) }
                 catch { end.yield(()); throw error }
             }
             try Task.checkCancellation()
@@ -163,8 +163,8 @@ struct MultipleIntegrationTests {
     }
 
     @Test func movedDuplicateAndUnavailableInstallationsFailSafely() throws {
-        let root = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
-        let original = root.appending(path: "Original.app"), moved = root.appending(path: "Moved.app")
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let original = root.appendingPathComponent("Original.app"), moved = root.appendingPathComponent("Moved.app")
         try FileManager.default.createDirectory(at: original, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: root) }
         #expect(try ProviderDiscovery.uniqueInstallation([original, original]).path == original.path)

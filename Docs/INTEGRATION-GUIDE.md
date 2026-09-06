@@ -1,6 +1,6 @@
 # Integrating Talk into a macOS app
 
-This guide follows the runnable Studio and Automator examples. It uses explicit pairing, synthetic data, macOS 13 APIs and Swift 6.2. Validate your actual platform/signing environment separately; see [qualification](QUALIFICATION.md) for measured Apple Development results and the remaining signing/platform qualification lanes. No daemon, cloud service, account, publisher authentication or automatic mutation retry is provided.
+This guide follows the runnable Studio and Automator examples. It uses explicit pairing, synthetic data, macOS 12.4 APIs and Swift 6.2. Validate your actual platform/signing environment separately; see [qualification](QUALIFICATION.md) for measured Apple Development results and the remaining signing/platform qualification lanes. No daemon, cloud service, account, publisher authentication or automatic mutation retry is provided.
 
 Start with the [installation guide](INSTALLATION.md) for Xcode/SwiftPM dependencies, signing, and app capabilities.
 

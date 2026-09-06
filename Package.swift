@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "Talk",
-    platforms: [.macOS(.v13)],
+    platforms: [.macOS("12.4")],
     products: [
         .library(name: "Talk", targets: ["Talk"]),
         .library(name: "TalkContractSchema", targets: ["TalkContractSchema"]),

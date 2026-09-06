@@ -94,7 +94,7 @@ struct WireBoundaryTests {
             try await stalled.send(Data([0, 0, 0, 100, 123]))
             for index in 1...15 {
                 #expect(try await healthy.request(action: "read") == .integer(Int64(index)))
-                try await Task.sleep(for: .milliseconds(100))
+                try await Task.sleep(nanoseconds: 100_000_000)
             }
             await #expect(throws: TalkError.disconnected) { try await stalled.readExactly(1) }
             #expect(await counter.value == 15)

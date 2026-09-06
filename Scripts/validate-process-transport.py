@@ -19,7 +19,7 @@ import argparse
 ROOT = Path(__file__).resolve().parent.parent
 SOURCES = ['TalkConnection', 'TLSConfiguration', 'PairedTLSIdentity', 'PairingCredential',
            'TalkMessage', 'FrameCodec', 'JSONValue', 'TalkError', 'Deadline', 'DeadlineTimer',
-           'TransportDiagnostics']
+           'TransportDiagnostics', 'TransportDiagnosticBuffer']
 
 
 class Peer:
@@ -96,7 +96,7 @@ def main():
     def save():
         summary.write_text(json.dumps(metadata, indent=2) + '\n')
     save()
-    command = ['xcrun', 'swiftc', '-parse-as-library', '-swift-version', '6',
+    command = ['xcrun', 'swiftc', '-target', f'{os.uname().machine}-apple-macosx12.4', '-parse-as-library', '-swift-version', '6',
                *[str(frozen / path.name) for path in inputs], '-o', str(folder / 'ProcessTransport')]
     result = subprocess.run(command, capture_output=True, text=True)
     (folder / 'build.log').write_text(result.stdout + result.stderr)
@@ -112,7 +112,7 @@ def main():
         (contents / 'Info.plist').write_bytes(plistlib.dumps({
             'CFBundleIdentifier': 'dev.talk.synthetic.process-transport.' + variant,
             'CFBundleExecutable': 'ProcessTransport', 'CFBundlePackageType': 'APPL',
-            'LSMinimumSystemVersion': '13.0'}))
+            'LSMinimumSystemVersion': '12.4'}))
         entitlements = folder / (variant + '.entitlements')
         entitlements.write_bytes(plistlib.dumps({
             'com.apple.security.app-sandbox': True,

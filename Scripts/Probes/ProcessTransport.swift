@@ -2,7 +2,6 @@
 // stdin/stdout are private anonymous control pipes, never evidence logs.
 import Foundation
 import Network
-import os
 
 private struct Command: Codable, Sendable {
     let operation: String
@@ -86,7 +85,7 @@ private enum ProcessTransport {
                 guard let credential = command.credential, let port = command.port,
                       let endpoint = NWEndpoint.Port(rawValue: port), port > 0 else { throw TalkError.invalidMessage }
                 seed?.cancel(); seed = nil
-                try await Task.sleep(for: .milliseconds(20))
+                try await Task.sleep(nanoseconds: 20_000_000)
                 // Keep the first listener alive, matching the in-process control.
                 let listener = try ProbeListener(credential: credential, port: endpoint)
                 replacement = listener
@@ -201,12 +200,23 @@ private enum ProcessTransport {
 private final class ProbeListener: Sendable {
     let listener: NWListener
     let ports: AsyncThrowingStream<NWEndpoint.Port, any Error>
-    private struct State: Sendable {
+    private struct State {
         var stopped = false
         var all: [NWConnection] = []
         var pending: [NWConnection] = []
     }
-    private let peers = OSAllocatedUnfairLock(initialState: State())
+    // State is private and accessed only under this lock. Connections use
+    // Network.framework's own synchronization after leaving the queue.
+    private final class Peers: @unchecked Sendable {
+        private let lock = NSLock()
+        private var state = State()
+        func withLock<T>(_ body: (inout State) -> T) -> T {
+            lock.lock()
+            defer { lock.unlock() }
+            return body(&state)
+        }
+    }
+    private let peers = Peers()
     init(credential: PairingCredential, port: NWEndpoint.Port) throws {
         let parameters = try TLSConfiguration.parameters(credential: credential, isServer: true)
         parameters.requiredLocalEndpoint = .hostPort(host: "127.0.0.1", port: port)
@@ -243,13 +253,19 @@ private final class ProbeListener: Sendable {
         }
     }
     func accept() async throws -> NWConnection {
+        // Only the readiness signal crosses the deadline task group; the
+        // connection is removed by this single consumer after the wait.
         try await withDeadline(seconds: 3) {
             while true {
                 try Task.checkCancellation()
-                if let connection = self.peers.withLock({ $0.pending.isEmpty ? nil : $0.pending.removeFirst() }) { return connection }
-                try await Task.sleep(for: .milliseconds(5))
+                if self.peers.withLock({ !$0.pending.isEmpty }) { return }
+                try await Task.sleep(nanoseconds: 5_000_000)
             }
         }
+        guard let connection = peers.withLock({ $0.pending.isEmpty ? nil : $0.pending.removeFirst() }) else {
+            throw TalkError.disconnected
+        }
+        return connection
     }
     func stop() {
         let connections = peers.withLock { state in

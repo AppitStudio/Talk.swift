@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 import Network
 import os
@@ -36,7 +37,7 @@ struct LocalEndpointTests {
         initialPeer.cancel()
         // This recreates the observed rapid role change; it is deliberately not
         // a claim that cancellation has reclaimed kernel/framework reservations.
-        try await Task.sleep(for: .milliseconds(20))
+        try await Task.sleep(nanoseconds: 20_000_000)
         let replacement = try EndpointTestListener(credential: credential, port: formerSource)
         defer { replacement.stop() }
         let replacementPort = try await replacement.ready()
@@ -132,7 +133,7 @@ private final class EndpointTestListener: Sendable {
     }
 
     func accept() async throws -> NWConnection {
-        let started = ContinuousClock.now
+        let started = clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW)
         while true {
             try Task.checkCancellation()
             let (connection, stopped) = peers.withLock { state in
@@ -140,8 +141,8 @@ private final class EndpointTestListener: Sendable {
             }
             if let connection { return connection }
             guard !stopped else { throw TalkError.unavailable }
-            guard started.duration(to: .now) < .seconds(3) else { throw TalkError.timedOut }
-            try await Task.sleep(for: .milliseconds(10))
+            guard (clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW) - started) < UInt64(3) * 1_000_000_000 else { throw TalkError.timedOut }
+            try await Task.sleep(nanoseconds: 10_000_000)
         }
     }
 

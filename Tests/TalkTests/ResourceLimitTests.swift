@@ -14,7 +14,7 @@ struct ResourceLimitTests {
         let host = PairingHost()
         let invitation = try await host.start(providerBundleID: "dev.example.provider") {
             begin.yield(())
-            do { try await Task.sleep(for: .seconds(30)) }
+            do { try await Task.sleep(nanoseconds: 30_000_000_000) }
             catch { end.yield(()); throw error }
             throw TalkError.permissionDenied
         }
@@ -50,7 +50,7 @@ struct ResourceLimitTests {
         let (entered, begin) = AsyncStream<Void>.makeStream(bufferingPolicy: .bufferingOldest(16))
         let server = TalkServer(record: grant, actions: ["read": "read"]) { _, _ in
             begin.yield(())
-            try await Task.sleep(for: .seconds(30))
+            try await Task.sleep(nanoseconds: 30_000_000_000)
             return .null
         }
         let client = try TalkClient(port: try await server.start(), credential: grant.credential)

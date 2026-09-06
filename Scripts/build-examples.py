@@ -62,7 +62,7 @@ try:
         shutil.copy2(binaries / product, contents / 'MacOS' / product)
         info = {'CFBundleIdentifier': identity_config['identifier'], 'CFBundleName': display,
                 'CFBundleDisplayName': display, 'CFBundleExecutable': product, 'CFBundlePackageType': 'APPL',
-                'CFBundleShortVersionString': '0.1.0', 'CFBundleVersion': '2', 'LSMinimumSystemVersion': '13.0',
+                'CFBundleShortVersionString': '0.1.0', 'CFBundleVersion': '3', 'LSMinimumSystemVersion': '12.4',
                 'NSHighResolutionCapable': True, 'NSPrincipalClass': 'NSApplication', 'TalkExampleVariant': variant,
                 'CFBundleURLTypes': [{'CFBundleURLName': identity_config['identifier'], 'CFBundleURLSchemes': [scheme]}]}
         if product == 'TalkStudio':

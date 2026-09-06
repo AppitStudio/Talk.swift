@@ -32,7 +32,7 @@ struct LoadProbe {
             try await provider.approve(record); records.append(record)
         }
         emit("LOAD ready integrations=16")
-        let start = ContinuousClock.now
+        let start = clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW)
         var cycles = 0, calls = 0, events = 0, connections = 0, recoveredConnections = 0
         var phase = "setup" {
             didSet {
@@ -78,7 +78,7 @@ struct LoadProbe {
                         client = StudioClient(transport: try TalkClient(port: port, credential: record.credential))
                         clients[clients.count - 1] = client
                         phase = "same-grant-recovery-\(clients.count - 1)"
-                        try await Task.sleep(for: .seconds(1))
+                        try await Task.sleep(nanoseconds: 1_000_000_000)
                         do {
                             try await client.connect(); _ = try await client.subscribe()
                         } catch {
@@ -98,7 +98,7 @@ struct LoadProbe {
                                 await control.transport.close()
                             }
                             emit("LOAD delayedSameGrantControl waitSeconds=35")
-                            try await Task.sleep(for: .seconds(35))
+                            try await Task.sleep(nanoseconds: 35_000_000_000)
                             let delayed = StudioClient(transport: try TalkClient(port: port, credential: record.credential))
                             do {
                                 try await delayed.connect(); _ = try await delayed.snapshot()
@@ -164,7 +164,7 @@ struct LoadProbe {
                 try await provider.approve(replacement); records[0] = replacement
                 cycles += 1
                 if cycles % 20 == 0 { emit("LOAD progress cycles=\(cycles) calls=\(calls)") }
-            } while start.duration(to: .now) < .seconds(seconds)
+            } while (clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW) - start) < UInt64(seconds) * 1_000_000_000
         } catch {
             for event in TransportDiagnostics.snapshot() { emit("TRANSPORT " + event) }
             emit("LOAD failure cycle=\(cycles) phase=\(phase) error=\(error)")
@@ -175,9 +175,9 @@ struct LoadProbe {
         for record in records { try await provider.revoke(record.credential.id) }
         guard await provider.integrations().isEmpty else { throw TalkError.invalidMessage }
         await provider.stop()
-        emit("LOAD complete duration=\(start.duration(to: .now)) integrations=16 cycles=\(cycles) calls=\(calls) events=\(events) connections=\(connections) overflows=\(cycles) revocations=\(cycles) recoveredConnections=\(recoveredConnections)")
+        emit("LOAD complete durationSeconds=\(Double(clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW) - start) / 1_000_000_000) integrations=16 cycles=\(cycles) calls=\(calls) events=\(events) connections=\(connections) overflows=\(cycles) revocations=\(cycles) recoveredConnections=\(recoveredConnections)")
         emit("LOAD cooldown listenersStopped=true grants=0 seconds=10")
-        try await Task.sleep(for: .seconds(10))
+        try await Task.sleep(nanoseconds: 10_000_000_000)
     }
     static func emit(_ value: String) { FileHandle.standardOutput.write(Data((value + "\n").utf8)) }
 
@@ -204,16 +204,16 @@ struct LoadProbe {
         guard result == 0 || connectError == EINPROGRESS else {
             emit("LOAD rawTCPControl connectErrno=\(connectError)"); return
         }
-        let started = ContinuousClock.now
+        let started = clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW)
         var pollState = pollfd(fd: descriptor, events: Int16(POLLOUT | POLLERR | POLLHUP), revents: 0)
         while result != 0 {
             let ready = poll(&pollState, 1, 0)
             if ready > 0 { break }
             if ready < 0 { emit("LOAD rawTCPControl pollErrno=\(errno)"); return }
-            guard started.duration(to: .now) < .seconds(2) else {
+            guard (clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW) - started) < UInt64(2) * 1_000_000_000 else {
                 emit("LOAD rawTCPControl timeoutSeconds=2"); return
             }
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(nanoseconds: 10_000_000)
         }
         var socketError: Int32 = 0
         var errorSize = socklen_t(MemoryLayout<Int32>.size)

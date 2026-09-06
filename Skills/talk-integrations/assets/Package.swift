@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "ExampleIntegration",
-    platforms: [.macOS(.v13)],
+    platforms: [.macOS("12.4")],
     products: [
         .library(name: "IntegrationContract", targets: ["IntegrationContract"]),
         .library(name: "IntegrationWiring", targets: ["IntegrationWiring"])

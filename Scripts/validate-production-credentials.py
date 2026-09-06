@@ -17,6 +17,7 @@ import json
 import plistlib
 import shutil
 import subprocess
+import os
 import tempfile
 import uuid
 
@@ -49,7 +50,7 @@ def build():
         shutil.copy2(p, frozen / p.name)
     (folder / 'source-hashes.json').write_text(json.dumps({p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in files}, indent=2) + '\n')
     for version in [1, 2]:
-        checked(['xcrun', 'swiftc', '-parse-as-library', '-swift-version', '6', '-O',
+        checked(['xcrun', 'swiftc', '-target', f'{os.uname().machine}-apple-macosx12.4', '-parse-as-library', '-swift-version', '6', '-O',
                  *(['-D', 'TALK_PROBE_UPDATE'] if version == 2 else []),
                  *[str(frozen / p.name) for p in files], '-o', str(folder / ('Probe' + str(version)))])
     assert (folder / 'Probe1').read_bytes() != (folder / 'Probe2').read_bytes()
@@ -62,7 +63,7 @@ def package(name, variant, version, config=None, copied_identifier=None):
     shutil.copy2(folder / ('Probe' + str(version)), contents / 'MacOS/Probe')
     identifier = config['identifier'] if config else copied_identifier or 'dev.talk.synthetic.production.unprovisioned.' + variant
     (contents / 'Info.plist').write_bytes(plistlib.dumps({'CFBundleIdentifier': identifier,
-        'CFBundleExecutable': 'Probe', 'CFBundlePackageType': 'APPL', 'CFBundleVersion': str(version)}))
+        'LSMinimumSystemVersion': '12.4', 'CFBundleExecutable': 'Probe', 'CFBundlePackageType': 'APPL', 'CFBundleVersion': str(version)}))
     # Use an unrestricted copied-ID attacker against both owner variants. A
     # sandboxed ad-hoc copy can stall in OS sandbox initialization before main;
     # that is not evidence of Keychain denial. Keep that separate platform result.

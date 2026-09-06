@@ -2,6 +2,12 @@
 
 **Status: public development preview, not a stable release.** The native example matrix and expanded Apple Development storage checks passed on the tested Mac. Real-app integration, unrelated-team/distribution/certificate-change qualification, independent review, and broader platform testing remain incomplete. Source publication does not mark those gates complete. See [current qualification](QUALIFICATION.md) for the measured scope and preserved inconclusive results.
 
+## macOS 12.4 deployment
+
+The SDK, generated clients, example apps and standalone probes now target macOS 12.4. The diagnostic buffer uses an NSLock-protected container, discovery uses compatible URL APIs, and example scenes use WindowGroup with the New Window command removed. Probe elapsed timing uses Darwin’s monotonic raw clock; waits use the nanosecond Task.sleep API. No storage migration, protocol change or OS-specific fallback was added.
+
+The full package compiles for arm64 and x86_64 with Xcode 26.2. Native execution evidence remains macOS 15.7.9 on Apple silicon. Actual macOS 12.4 execution and native Intel testing are still pending. Xcode’s bundled test harness targets macOS 14 independently of the package runtime minimum.
+
 ## Sole supported storage path
 
 `CredentialStore` now exclusively uses the macOS data-protection Keychain. It verifies the running host's Apple signature, obtains the signed application identifier and explicitly selects that access group for every read, update, add and delete. It does not choose a shared group from entitlement ordering. Items are nonsynchronizing and created with `kSecAttrAccessibleWhenUnlockedThisDeviceOnly`. Per-query interaction is disabled; process-wide prompt policy is untouched. Existing retained-operation limits and unresolved-write recovery remain.
@@ -18,13 +24,14 @@ Host: macOS 15.7.9, Apple silicon, Swift 6.2.3 / Xcode 26.2.
 
 | Check | Result and scope |
 | --- | --- |
-| Complete current Swift Testing suite | 63 tests / 19 suites passed; two existing opt-in workloads skipped. |
+| Complete current Swift Testing suite | 65 tests / 20 suites passed; two existing opt-in workloads skipped. |
 | Production unprovisioned hosts | Six checks passed: load/save/delete fail with `credentialConfiguration`, standard and sandboxed, actual ad-hoc processes. |
 | Production group selection | Regression tests reject missing/wildcard/mismatched identifiers and select the app group even when a shared group is first. |
-| Release compilation | Passed for current sources. |
+| Release compilation | Full arm64 and x86_64 builds passed; all 14 executable products declare macOS 12.4 in their Mach-O load commands. |
+| macOS 12.4-targeted process probes | All four standard/sandbox combinations passed role reversal, calls, reconnect and wrong-key rejection; eight callback-routing scenarios and a short AddressSanitizer parser run passed on the current host. |
 | Exact guide blocks and commands | Typecheck/export/generation/directional compatibility validation passed with the new production API. |
-| Native examples | All four standard/sandbox combinations passed pairing, calls/events, reconnect, restart/cold launch and durable revocation. Additional native denial/read-only/replacement checks passed. All four apps restarted empty after protected reload/cleanup. |
-| Apple Development production matrix | Expanded 98 checks passed twice with fresh disposable IDs. Adds unrestricted copied-ID attacks and actual stored attribute checks to restart/update continuity, raw denial, independent storage and owning cleanup. |
+| Native examples | Before the macOS 12.4 scene update, all four standard/sandbox combinations passed pairing, calls/events, reconnect, restart/cold launch and durable revocation. Additional native denial/read-only/replacement checks passed. All four apps restarted empty after protected reload/cleanup. |
+| Apple Development production matrix | 98 checks passed again with macOS 12.4-targeted probes on the current host, following the earlier two fresh-ID passes. Adds unrestricted copied-ID attacks and actual stored attribute checks to restart/update continuity, raw denial, independent storage and owning cleanup. |
 | Sandboxed copied-ID/identity reuse | Inconclusive pre-main OS initialization stalls retained; fresh-ID successful matrix does not clear this availability case. |
 | Developer ID / App Store / certificate renewal | Unverified. |
 | Unrelated real Team ID | Unverified; available matching profiles belong to one team. |
@@ -60,7 +67,7 @@ Use synthetic application data until the production signing lane passes and the 
 2. Quit/reopen both apps, launch the provider from the consumer, and verify the same saved grant works without another Talk prompt. Install a legitimate update through the intended distribution lane and repeat.
 3. Test another app with the same public service name, a copied bundle ID under a different signer, and unrelated Team ID. Require positive owner controls before and after denied raw reads/writes/deletes. Never approve attacker access.
 4. Revoke one integration while others are active. Confirm live cancellation and durable absence after fresh restart. Exercise locked storage only in an approved test environment; confirm pending operations cannot be replayed or reported as completed.
-5. Exercise actual sleep/wake during calls and pending consent, user switching, minimum macOS 13 and every supported OS, native Intel, moved/duplicate installs and arbitrary sandbox locations. Record uncertain mutations and reconcile state before issuing another action.
+5. Exercise actual sleep/wake during calls and pending consent, user switching, minimum macOS 12.4 and every supported OS, native Intel, moved/duplicate installs and arbitrary sandbox locations. Record uncertain mutations and reconcile state before issuing another action.
 6. Test firewall/network filters and system pressure on a dedicated machine. Current transport is numeric IPv4 loopback; no IPv6 support is claimed. Do not change a tester's unrelated host settings silently.
 7. Run the existing process-transport, callback-routing, load and parser harnesses. Keep failures and their exact source/build evidence; a later successful recovery does not erase them.
 

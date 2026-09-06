@@ -86,7 +86,7 @@ def main():
     frozen = folder / 'Sources'
     frozen.mkdir()
     paths = [ROOT / 'Sources/Talk' / (name + '.swift') for name in
-             ['EndpointResolver', 'PairingCredential', 'PairingRecord', 'TalkError', 'Deadline', 'DeadlineTimer', 'TransportDiagnostics']]
+             ['EndpointResolver', 'PairingCredential', 'PairingRecord', 'TalkError', 'Deadline', 'DeadlineTimer', 'TransportDiagnostics', 'TransportDiagnosticBuffer']]
     paths.append(ROOT / 'Scripts/Probes/CallbackRouting.swift')
     for path in paths:
         shutil.copy2(path, frozen / path.name)
@@ -97,7 +97,7 @@ def main():
     def save():
         (folder / 'summary.json').write_text(json.dumps(metadata, indent=2) + '\n')
     save()
-    result = subprocess.run(['xcrun', 'swiftc', '-parse-as-library', '-swift-version', '6',
+    result = subprocess.run(['xcrun', 'swiftc', '-target', f'{os.uname().machine}-apple-macosx12.4', '-parse-as-library', '-swift-version', '6',
                              *[str(frozen / path.name) for path in paths], '-o', str(folder / 'CallbackRouting')],
                             capture_output=True, text=True)
     (folder / 'build.log').write_text(result.stdout + result.stderr)
@@ -112,7 +112,7 @@ def main():
         shutil.copy2(folder / 'CallbackRouting', contents / 'MacOS/CallbackRouting')
         (contents / 'Info.plist').write_bytes(plistlib.dumps({
             'CFBundleIdentifier': bundle_id, 'CFBundleExecutable': 'CallbackRouting',
-            'CFBundlePackageType': 'APPL', 'LSUIElement': True, 'LSMinimumSystemVersion': '13.0',
+            'CFBundlePackageType': 'APPL', 'LSUIElement': True, 'LSMinimumSystemVersion': '12.4',
             # Match the SDK's actual callback protocol in the receiver's plist.
             'CFBundleURLTypes': [{'CFBundleURLSchemes': ['talk-spike-consumer'] if name.startswith('Consumer-') else ['talk-validation-' + token]}]}))
         entitlement = folder / (name + '.entitlements')

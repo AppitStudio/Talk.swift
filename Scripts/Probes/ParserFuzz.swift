@@ -1,5 +1,6 @@
 // Deterministic mutation runner under AddressSanitizer. The installed Apple
 // Swift compiler does not support libFuzzer on arm64. No coverage-guided claim.
+import Darwin
 import Foundation
 import CryptoKit
 
@@ -51,7 +52,7 @@ private enum ParserMutations {
                             Data(repeating: 255, count: 4), Data([0, 1, 0, 0]),
                             Data("talk-pair-v1:invalid".utf8), Data("{\"payload\":\"\\\\\\\"[{}]\"}".utf8), invitation, schema]
         emit("mutation begin seed=\(seed) seconds=\(seconds) maxBytes=65540 sanitizer=address coverageGuided=false")
-        let start = ContinuousClock.now
+        let start = clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW)
         var cases = 0, accepted = 0, acceptedSchemas = 0, acceptedInvitations = 0
         repeat {
             cases += 1
@@ -94,7 +95,7 @@ private enum ParserMutations {
             }
             if cases.isMultiple(of: 25_000) { emit("mutation progress cases=\(cases) acceptedFrames=\(accepted)") }
             if replay == cases { break }
-        } while replay.map({ cases < $0 }) ?? (start.duration(to: .now) < .seconds(seconds))
+        } while replay.map({ cases < $0 }) ?? ((clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW) - start) < UInt64(seconds) * 1_000_000_000)
         emit("mutation complete cases=\(cases) acceptedFrames=\(accepted) acceptedSchemas=\(acceptedSchemas) acceptedInvitations=\(acceptedInvitations) result=PASS")
     }
 
