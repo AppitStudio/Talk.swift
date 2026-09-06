@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "contractID": "com.example.integration",
+  "contractVersion": "1.0.0",
+  "name": "Example",
+  "types": [
+    {"name": "Snapshot", "kind": "struct", "fields": [
+      {"name": "sessionID", "type": "UUID"},
+      {"name": "revision", "type": "Int64"},
+      {"name": "value", "type": "String"}
+    ]},
+    {"name": "SetValue", "kind": "struct", "fields": [
+      {"name": "value", "type": "String"}
+    ]}
+  ],
+  "actions": [
+    {"id": "example.read", "symbol": "read", "method": "snapshot", "scope": "example.view", "input": "Void", "output": "Snapshot", "mutation": false},
+    {"id": "example.set", "symbol": "set", "method": "setValue", "scope": "example.edit", "input": "SetValue", "output": "Snapshot", "mutation": true},
+    {"id": "example.observe", "symbol": "observe", "method": "subscribe", "scope": "example.observe", "input": "Void", "output": "Snapshot", "mutation": false}
+  ],
+  "events": [
+    {"id": "example.changed", "symbol": "changed", "payload": "Snapshot"}
+  ]
+}

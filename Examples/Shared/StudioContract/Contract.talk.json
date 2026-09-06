@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "contractID": "dev.talk.examples.studio",
+  "contractVersion": "1.0.0",
+  "name": "Studio",
+  "types": [
+    {
+      "name": "SceneKind",
+      "kind": "enum",
+      "cases": [
+        "focus",
+        "available",
+        "away"
+      ]
+    },
+    {
+      "name": "Scene",
+      "kind": "struct",
+      "fields": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "name",
+          "type": "String"
+        },
+        {
+          "name": "symbol",
+          "type": "String"
+        },
+        {
+          "name": "kind",
+          "type": "SceneKind"
+        }
+      ]
+    },
+    {
+      "name": "SelectScene",
+      "kind": "struct",
+      "fields": [
+        {
+          "name": "id",
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "name": "StudioSnapshot",
+      "kind": "struct",
+      "fields": [
+        {
+          "name": "sessionID",
+          "type": "UUID"
+        },
+        {
+          "name": "revision",
+          "type": "Int64"
+        },
+        {
+          "name": "selectedSceneID",
+          "type": "String"
+        },
+        {
+          "name": "scenes",
+          "type": "[Scene]"
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "studio.scenes.read",
+      "symbol": "read",
+      "method": "snapshot",
+      "scope": "studio.scenes.read",
+      "input": "Void",
+      "output": "StudioSnapshot",
+      "mutation": false
+    },
+    {
+      "id": "studio.scenes.select",
+      "symbol": "select",
+      "method": "selectScene",
+      "scope": "studio.scenes.select",
+      "input": "SelectScene",
+      "output": "StudioSnapshot",
+      "mutation": true
+    },
+    {
+      "id": "studio.scenes.observe",
+      "symbol": "observe",
+      "method": "subscribe",
+      "scope": "studio.scenes.observe",
+      "input": "Void",
+      "output": "StudioSnapshot",
+      "mutation": false
+    }
+  ],
+  "events": [
+    {
+      "id": "studio.scenes.changed",
+      "symbol": "changed",
+      "payload": "StudioSnapshot"
+    }
+  ]
+}

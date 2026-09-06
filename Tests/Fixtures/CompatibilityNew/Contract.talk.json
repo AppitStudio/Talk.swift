@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "contractID": "dev.talk.compatibility",
+  "contractVersion": "1.1.0",
+  "name": "NewFixture",
+  "types": [
+    {
+      "name": "Options",
+      "kind": "struct",
+      "fields": [
+        {
+          "name": "value",
+          "type": "String"
+        },
+        {
+          "name": "note",
+          "type": "String?"
+        }
+      ]
+    },
+    {
+      "name": "Value",
+      "kind": "struct",
+      "fields": [
+        {
+          "name": "value",
+          "type": "String"
+        },
+        {
+          "name": "note",
+          "type": "String?"
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "test.read",
+      "symbol": "read",
+      "method": "read",
+      "scope": "test.read",
+      "input": "Void",
+      "output": "Value",
+      "mutation": false
+    },
+    {
+      "id": "test.write",
+      "symbol": "write",
+      "method": "write",
+      "scope": "test.write",
+      "input": "Options",
+      "output": "Value",
+      "mutation": true
+    },
+    {
+      "id": "test.extra",
+      "symbol": "extra",
+      "method": "extra",
+      "scope": "test.read",
+      "input": "Void",
+      "output": "Value",
+      "mutation": false
+    }
+  ],
+  "events": []
+}
