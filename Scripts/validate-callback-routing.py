@@ -86,13 +86,13 @@ def main():
     frozen = folder / 'Sources'
     frozen.mkdir()
     paths = [ROOT / 'Sources/Talk' / (name + '.swift') for name in
-             ['EndpointResolver', 'PairingCredential', 'PairingRecord', 'TalkError', 'Deadline', 'DeadlineTimer', 'TransportDiagnostics', 'TransportDiagnosticBuffer']]
+             ['EndpointResolver', 'PairingRouting', 'PairingCredential', 'PairingRecord', 'TalkError', 'Deadline', 'DeadlineTimer', 'TransportDiagnostics', 'TransportDiagnosticBuffer']]
     paths.append(ROOT / 'Scripts/Probes/CallbackRouting.swift')
     for path in paths:
         shutil.copy2(path, frozen / path.name)
     shutil.copy2(__file__, folder / Path(__file__).name)
     metadata = {'status': 'INCOMPLETE', 'system': subprocess.check_output(['sw_vers', '-productVersion'], text=True).strip(),
-                'architecture': os.uname().machine, 'scenarios': [],
+                'architecture': os.uname().machine, 'callback_policy': 'generic-unique-running', 'scenarios': [],
                 'source_hashes': {path.name: hashlib.sha256((frozen / path.name).read_bytes()).hexdigest() for path in paths}}
     def save():
         (folder / 'summary.json').write_text(json.dumps(metadata, indent=2) + '\n')

@@ -70,4 +70,41 @@ struct DiscoveryFileTests {
         #expect(EndpointResolver.uniqueRunningCallback([first, first]) == nil)
         #expect(EndpointResolver.uniqueRunningCallback([first, nil]) == nil)
     }
+
+    @Test @MainActor
+    func savedEndpointSupportsFutureConsumersWithPublicHintsOnly() throws {
+        let pairing = UUID(), request = UUID()
+        let callback = "dev.example.future-consumer"
+        let url = PairingRouting.url(scheme: "talk-spike-provider", host: "connect",
+                                    fields: ["pairing": pairing.uuidString, "request": request.uuidString, "callback": callback])
+        let reply = try #require(EndpointResolver.response(to: url, pairingID: pairing, port: 12345))
+        #expect(reply.callback == callback)
+        let fields = try #require(PairingRouting.fields(reply.url, scheme: "talk-spike-consumer", host: "endpoint",
+                                                       names: ["request", "port"]))
+        #expect(fields == ["request": request.uuidString, "port": "12345"])
+        #expect(EndpointResolver.response(to: url, pairingID: pairing, port: 12345,
+                                         allowedCallbackBundleIDs: ["dev.example.other"]) == nil)
+        #expect(EndpointResolver.response(to: url, pairingID: pairing, port: 12345,
+                                         allowedCallbackBundleIDs: [callback]) != nil)
+        #expect(EndpointResolver.response(to: url, pairingID: UUID(), port: 12345) == nil)
+        #expect(EndpointResolver.response(to: url, pairingID: pairing, port: 0) == nil)
+    }
+
+    @Test @MainActor
+    func savedEndpointRejectsMalformedRoutesBeforeOpeningApps() throws {
+        let pairing = UUID()
+        let url = PairingRouting.url(scheme: "talk-spike-provider", host: "connect",
+                                    fields: ["pairing": pairing.uuidString, "request": UUID().uuidString,
+                                             "callback": "dev.example.consumer"])
+        for suffix in ["&callback=dev.example.other", "#fragment", "&extra=1", "&huge=" + String(repeating: "x", count: 2048)] {
+            let malformed = try #require(URL(string: url.absoluteString + suffix))
+            #expect(EndpointResolver.response(to: malformed, pairingID: pairing, port: 12345) == nil)
+        }
+        for callback in ["", "app/path", "app name", String(repeating: "x", count: 256)] {
+            let malformed = PairingRouting.url(scheme: "talk-spike-provider", host: "connect",
+                                               fields: ["pairing": pairing.uuidString, "request": UUID().uuidString,
+                                                        "callback": callback])
+            #expect(EndpointResolver.response(to: malformed, pairingID: pairing, port: 12345) == nil)
+        }
+    }
 }

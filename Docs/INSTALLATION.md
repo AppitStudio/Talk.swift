@@ -17,12 +17,12 @@ Talk is a macOS Swift package. Both apps need the SDK; a provider exposes a cont
 
 The deployment target is the oldest OS that can run your app, not the OS required to build it. Keep a Swift 6.2+ build toolchain on a supported newer Mac; Xcode 26.2 requires macOS 15.6 or later. See [Apple’s Xcode requirements](https://developer.apple.com/xcode/system-requirements/). Actual macOS 12.4 runtime validation remains pending. The bundled Xcode 26.2 test harness raises test targets to macOS 14; this does not raise the SDK or example-app minimum. Use the example apps and standalone probes for runtime checks on Monterey.
 
-The current beta version is `0.1.0-beta.1`; there is no stable release. Pin this exact prerelease for discoverable pairing, or use `main` to evaluate ongoing changes. Commit your application's resolved dependency state. See [qualification](BETA-READINESS.md) for what remains unverified, including distribution delivery and other OS/hardware combinations.
+The current beta version is `0.1.0-beta.2`; there is no stable release. Pin this exact prerelease for discoverable pairing and the generic callback default, or use `main` to evaluate ongoing changes. Generic providers require `0.1.0-beta.2` or later at both pairing and saved-reconnect call sites; `0.1.0-beta.1` requires an explicit callback list. Commit your application's resolved dependency state. See [qualification](BETA-READINESS.md) for what remains unverified, including distribution delivery and other OS/hardware combinations.
 
 ## Xcode app targets
 
 1. Add `https://github.com/AppitStudio/Talk.swift.git` through Xcode's package dependency interface.
-2. Choose exact version `0.1.0-beta.1` (or a reviewed commit).
+2. Choose exact version `0.1.0-beta.2` (or a reviewed commit).
 3. Link the **Talk** library product to each participating application target.
 4. Add `import Talk` where you implement the integration.
 5. Create a separate shared Swift package target for your generated contract and client. Link that library into the apps that use it.
@@ -44,7 +44,7 @@ let package = Package(
         .library(name: "IntegrationContract", targets: ["IntegrationContract"])
     ],
     dependencies: [
-        .package(url: "https://github.com/AppitStudio/Talk.swift.git", exact: "0.1.0-beta.1")
+        .package(url: "https://github.com/AppitStudio/Talk.swift.git", exact: "0.1.0-beta.2")
     ],
     targets: [
         .target(

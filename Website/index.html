@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fafbfc" />
+    <meta name="description" content="Talk.swift is a beta Swift SDK for macOS apps that work together. Typed actions, local communication, and permissions the user controls." />
+    <meta property="og:title" content="Talk.swift — Let your apps work together" />
+    <meta property="og:description" content="Typed actions between macOS apps. Local communication. Permissions the user controls. Explore the Swift SDK and integration guides." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Talk.swift — Let your apps work together" />
+    <meta name="twitter:description" content="A beta Swift SDK for typed, local app-to-app integrations on macOS." />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <title>Talk.swift — Let your apps work together</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header shell">
+      <a class="wordmark" href="#" aria-label="Talk.swift home">
+        <span class="brand-symbol" aria-hidden="true"><span></span><span></span></span>
+        Talk<span class="wordmark-extension">.swift</span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a class="nav-how" href="#how-it-works">How it works</a>
+        <a href="#build">For developers</a>
+        <a class="github-link" href="https://github.com/AppitStudio/Talk.swift" aria-label="Talk.swift on GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1a11 11 0 0 0-3.48 21.44c.55.1.75-.24.75-.53v-2.05c-3.06.66-3.7-1.3-3.7-1.3-.5-1.27-1.22-1.6-1.22-1.6-1-.68.08-.67.08-.67 1.1.08 1.68 1.13 1.68 1.13.98 1.67 2.57 1.19 3.2.91.1-.71.38-1.19.7-1.47-2.45-.28-5.02-1.22-5.02-5.44 0-1.2.43-2.18 1.13-2.95-.11-.28-.49-1.4.1-2.91 0 0 .92-.3 3.03 1.13A10.5 10.5 0 0 1 12 6.32c.94 0 1.88.12 2.76.37 2.1-1.43 3.02-1.13 3.02-1.13.6 1.51.22 2.63.11 2.91.7.77 1.12 1.75 1.12 2.95 0 4.23-2.57 5.16-5.03 5.43.4.35.75 1.02.75 2.06v3c0 .3.2.64.76.53A11 11 0 0 0 12 1Z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero shell" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <a class="beta-pill" href="#status"><span aria-hidden="true"></span> A Swift SDK for macOS <span class="pill-beta">Beta</span></a>
+          <h1 id="hero-title">Let your apps<br />work together.</h1>
+          <p class="hero-description">Your app has great things to offer.<br class="desktop-break" /> Talk gives other apps a way to use them.</p>
+          <p class="hero-detail">Expose typed actions. Connect through a shared contract.<br class="desktop-break" /> Let the user decide what happens next.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="https://github.com/AppitStudio/Talk.swift/blob/main/Docs/INSTALLATION.md">Start building <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5"/></svg></a>
+            <a class="text-link" href="#how-it-works">See how it works</a>
+          </div>
+        </div>
+
+        <figure class="conversation" aria-labelledby="conversation-caption">
+          <div class="conversation-heading"><span class="local-indicator" aria-hidden="true"></span> A conversation, on your Mac <span class="diagram-label">Illustration</span></div>
+          <div class="app-flow">
+            <div class="app-node app-node-sender">
+              <div class="app-monogram extrabar-monogram" aria-hidden="true">E<span>+</span></div>
+              <strong>ExtraBar</strong>
+              <span>Runs the action</span>
+            </div>
+            <div class="connection-lines" aria-hidden="true">
+              <div class="flow-track flow-track-outgoing"><span class="flow-packet packet-outgoing"></span><span class="track-arrow">›</span></div>
+              <div class="talk-chip">Talk</div>
+              <div class="flow-track flow-track-incoming"><span class="flow-packet packet-incoming"></span><span class="track-arrow">‹</span></div>
+            </div>
+            <div class="app-node app-node-provider">
+              <div class="app-monogram dockflow-monogram" aria-hidden="true">D<span>.</span></div>
+              <strong>DockFlow</strong>
+              <span>Provides the action</span>
+            </div>
+          </div>
+          <div class="conversation-log">
+            <div class="log-line request-line"><span class="log-direction" aria-hidden="true">↗</span><span>Request available presets</span><span class="log-kind">Typed action</span></div>
+            <div class="log-line response-line"><span class="log-direction" aria-hidden="true">↙</span><span>Return the preset list</span><span class="log-kind">Typed result</span></div>
+          </div>
+          <figcaption id="conversation-caption"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 8V6a4 4 0 0 1 8 0v2M5 8h10v9H5zM10 11v3"/></svg> Paired locally. Limited to approved permissions.</figcaption>
+        </figure>
+        <div class="hero-footnote"><span>Swift 6.2+</span><span>macOS 12.4+ target<sup>*</sup></span><span>Apple frameworks</span><a href="#status">Beta status &amp; requirements</a></div>
+      </section>
+
+      <section class="why-section shell" aria-labelledby="why-title">
+        <div class="section-intro"><span class="section-mark" aria-hidden="true"></span><h2 id="why-title">Good tools become better<br />when they can talk.</h2></div>
+        <div class="why-copy"><p>Mac apps are wonderfully focused. But a workflow rarely ends at one app’s window.</p><p>Talk was built so independently developed apps can cooperate through a clear, shared contract. Less one-off integration plumbing. More time for the things your app does best.</p><p class="why-conclusion">One SDK. Local communication. The user in control.</p></div>
+      </section>
+
+      <section class="roles-section" id="how-it-works" aria-labelledby="roles-title">
+        <div class="shell">
+          <div class="roles-header"><h2 id="roles-title">One app. Either side<br />of the conversation.</h2><p>An app can offer actions, run actions in other apps, or do both. Each direction has its own connections and permissions.</p></div>
+          <div class="roles-grid">
+            <article class="role role-incoming">
+              <div class="direction-symbol" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M4 20h23m-7-7 7 7-7 7M32 8v24"/></svg></div>
+              <h3>Let apps use yours.</h3>
+              <p>Define what your app can do. Publish its contract. Other developers can build against it without you adding custom code for every new app.</p>
+              <div class="role-example"><span>In DockFlow</span><strong>Apps with access</strong><p>Manage incoming connections and revoke each app’s permissions.</p></div>
+            </article>
+            <article class="role role-outgoing">
+              <div class="direction-symbol" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M13 20h23m-7-7 7 7-7 7M8 8v24"/></svg></div>
+              <h3>Bring other apps into yours.</h3>
+              <p>Choose the apps your product supports. Build features around their published contracts. Give users an app library to connect the ones they use.</p>
+              <div class="role-example"><span>In ExtraBar</span><strong>Apps I control</strong><p>Choose DockFlow, pair it, and use its actions from your workflow.</p></div>
+            </article>
+          </div>
+          <p class="roles-note">The recommended home for both: a <strong>Talk Integrations</strong> tab, with clearly separated incoming access and outgoing connections. <a href="https://github.com/AppitStudio/Talk.swift/blob/main/Docs/INTEGRATION-UX.md">Read the UI guide</a></p>
+        </div>
+      </section>
+
+      <section class="pairing-section shell" aria-labelledby="pairing-title">
+        <div class="pairing-title"><h2 id="pairing-title">An introduction.<br />Then a connection.</h2><p>Explicit pairing at the start.<br />Saved consent for the work that follows.</p><a class="text-link" href="https://github.com/AppitStudio/Talk.swift/blob/main/Docs/DISCOVERABLE-PAIRING.md">Explore the pairing flow</a></div>
+        <ol class="pairing-steps">
+          <li><div class="step-marker"><span>1</span><i aria-hidden="true"></i></div><div><h3>Find the right app.</h3><p>Turn on pairing in the app offering actions. Discover it from the supported app library in the app that will use them.</p></div></li>
+          <li><div class="step-marker"><span>2</span><i aria-hidden="true"></i></div><div><h3>Compare. Choose. Approve.</h3><p>Compare the full code in both apps. Review the permissions and approve only the access you want to give.</p></div></li>
+          <li><div class="step-marker"><span>3</span></div><div><h3>Keep your workflow moving.</h3><p>Later permitted actions use the saved grant. Revoke access per integration. New permissions need new consent.</p></div></li>
+        </ol>
+      </section>
+
+      <section class="developer-section" id="build" aria-labelledby="developer-title">
+        <div class="shell developer-grid">
+          <div class="developer-copy"><h2 id="developer-title">A shared language.<br />A clear place to start.</h2><p>A schema defines the actions, events, types, and scopes. Talk’s tools generate Swift clients. Integration guides give developers and coding agents the context to put them to work.</p><a class="button button-light" href="https://github.com/AppitStudio/Talk.swift/blob/main/Docs/INSTALLATION.md">Read the installation guide <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5"/></svg></a></div>
+          <div class="code-block"><div class="code-heading"><span>Package.swift</span><span>Swift Package Manager</span></div><pre tabindex="0" aria-label="Swift package dependency"><code><span class="code-comment">// Add Talk to your app.</span>
+<span class="code-function">.package</span>(
+    url: <span class="code-string">"https://github.com/AppitStudio/Talk.swift.git"</span>,
+    exact: <span class="code-string">"0.1.0-beta.2"</span>
+)</code></pre><p class="code-caption">Pin the beta exactly. Link the Talk product to each app.</p><p class="version-note">Beta.2 includes general incoming connections and public app integration guides. This website remains a local preview until deployed.</p></div>
+          <div class="developer-resources">
+            <a href="https://github.com/AppitStudio/Talk.swift/tree/main/Integrations"><span class="resource-index" aria-hidden="true">↳</span><span><strong>App integration guides</strong><span>One format. Public contracts. No private app source required.</span></span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M5 5h10v10"/></svg></a>
+            <a href="https://github.com/AppitStudio/Talk.swift/blob/main/Skills/talk-integrations/SKILL.md"><span class="resource-index" aria-hidden="true">↳</span><span><strong>Bring your coding agent</strong><span>A portable skill for adding, documenting, and validating integrations.</span></span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M5 5h10v10"/></svg></a>
+            <a href="https://github.com/AppitStudio/Talk.swift/blob/main/Docs/EXAMPLES.md"><span class="resource-index" aria-hidden="true">↳</span><span><strong>Run the example apps</strong><span>Explore provider and consumer lifecycles in a working app pair.</span></span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M5 5h10v10"/></svg></a>
+          </div>
+        </div>
+      </section>
+
+      <section class="status-section shell" id="status" aria-labelledby="status-title">
+        <div><span class="status-label">A public beta, still growing</span><h2 id="status-title">Build with a clear<br />understanding of the limits.</h2></div>
+        <div class="status-copy"><p>Talk needs more testing and validation before production reliance. APIs may change. Start with synthetic or noncritical data and validate your actual signed apps.</p><p><sup>*</sup> Targets macOS 12.4+; Monterey runtime validation is pending. Swift 6.2+ and correctly Apple-signed, provisioned app targets are required for saved pairing.</p><p>Pairing proves possession of a paired credential. App names are not verified publisher identities. Broader platform, distribution, and independent security qualification remain open.</p><div class="status-links"><a href="https://github.com/AppitStudio/Talk.swift/blob/main/Docs/BETA-READINESS.md">Read beta readiness</a><a href="https://github.com/AppitStudio/Talk.swift/blob/main/Docs/SECURITY-NOTES.md">Understand the security model</a></div></div>
+      </section>
+    </main>
+
+    <footer class="site-footer shell"><a class="wordmark" href="#" aria-label="Talk.swift home"><span class="brand-symbol" aria-hidden="true"><span></span><span></span></span>Talk<span class="wordmark-extension">.swift</span></a><p>Built by Appit Studio.<br /><span>License selection is pending; no license grant yet.</span></p><a href="https://github.com/AppitStudio/Talk.swift">Explore the repository <span aria-hidden="true">↗</span></a></footer>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

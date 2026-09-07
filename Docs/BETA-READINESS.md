@@ -2,6 +2,14 @@
 
 **Status: public development preview, not a stable release.** The native example matrix and expanded Apple Development storage checks passed on the tested Mac. Targeted discoverable pairing in locally Developer ID-signed DockFlow and ExtraBar also passed. Broader real-app coverage, unrelated-team/distribution/certificate-change qualification, independent review, and platform testing remain incomplete. Source publication does not mark those gates complete. See [current qualification](QUALIFICATION.md) for the measured scope and preserved inconclusive results.
 
+## 0.1.0-beta.2
+
+`0.1.0-beta.2` adds a generic incoming callback default, the recommended two-direction Talk Integrations UX, public app guides with an external DockFlow contract package, and the source for a static GSAP landing page. Upgrade app and contract-package pins together to this beta for generic pairing and saved reconnect. The earlier `0.1.0-beta.1` requires explicit callback lists. The landing page remains a local preview until separately deployed.
+
+The beta.2 source validation passes 80 Swift tests in 21 suites (two existing opt-in workloads skipped), eight generic AppKit endpoint/duplicate-process routing scenarios, all four generic discoverable-pairing sandbox combinations, and the exact integration-guide code/commands. The public DockFlow recipe compiles from public artifacts without private app source. A focused second-agent implementation review found no actionable routing issues; this is not independent security qualification. Actual unknown-consumer signed-app persistence/restart, distribution and broader platform gates remain open.
+
+The new callback default changes routing eligibility, not the trust model: valid bounded fields, a single running receiver, explicit pairing mode, full-code comparison, scoped approval and authenticated TLS still apply. Deliberately closed providers can supply a bounded explicit list. See [integration UX](INTEGRATION-UX.md) and [public app guides](../Integrations/README.md).
+
 ## macOS 12.4 deployment
 
 The SDK, generated clients, example apps and standalone probes now target macOS 12.4. The diagnostic buffer uses an NSLock-protected container, discovery uses compatible URL APIs, and example scenes use WindowGroup with the New Window command removed. Probe elapsed timing uses Darwin’s monotonic raw clock; waits use the nanosecond Task.sleep API. No storage migration, protocol change or OS-specific fallback was added.
@@ -24,7 +32,8 @@ Host: macOS 15.7.9, Apple silicon, Swift 6.2.3 / Xcode 26.2.
 
 | Check | Result and scope |
 | --- | --- |
-| Complete current Swift Testing suite | 75 tests / 21 suites passed for `0.1.0-beta.1`; two existing opt-in workloads skipped. |
+| Current Swift Testing suite | 80 tests / 21 suites passed for the beta.2 source; two existing opt-in workloads skipped. |
+| Historical beta.1 Swift Testing suite | 75 tests / 21 suites passed for `0.1.0-beta.1`; two existing opt-in workloads skipped. |
 | Production unprovisioned hosts | Six checks passed: load/save/delete fail with `credentialConfiguration`, standard and sandboxed, actual ad-hoc processes. |
 | Production group selection | Regression tests reject missing/wildcard/mismatched identifiers and select the app group even when a shared group is first. |
 | Release compilation | Full arm64 and x86_64 builds passed; all 14 executable products declare macOS 12.4 in their Mach-O load commands. |

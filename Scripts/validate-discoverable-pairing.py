@@ -91,7 +91,7 @@ def main():
     assert 'warning:' not in result.stderr, 'unexpected compiler warning'
     summary = {'status': 'INCOMPLETE', 'system': subprocess.check_output(['sw_vers', '-productVersion'], text=True).strip(),
                'source_hashes': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in (ROOT / 'Sources').rglob('*.swift')},
-               'scenarios': []}
+               'callback_policy': 'generic-unique-running', 'scenarios': []}
     def save(): (folder / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
     apps = []
     def bundle(name, identity, sandboxed):

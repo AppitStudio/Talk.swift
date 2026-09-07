@@ -34,8 +34,7 @@ private final class RoutingDelegate: NSObject, NSApplicationDelegate {
                                               URLQueryItem(name: "request", value: UUID().uuidString),
                                               URLQueryItem(name: "callback", value: callbackID)]
                         guard let url = request.url else { throw TalkError.invalidMessage }
-                        EndpointResolver.reply(to: url, pairingID: pairingID, port: 9,
-                                               allowedCallbackBundleIDs: [callbackID])
+                        EndpointResolver.reply(to: url, pairingID: pairingID, port: 9)
                         write(["attempted": true])
                     case "stop":
                         write(["stopped": true])

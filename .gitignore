@@ -2,6 +2,10 @@
 .build/
 LocalBuild/
 .swiftpm/
+# Landing page dependencies and generated output.
+/Website/node_modules/
+/Website/dist/
+/Website/.vite/
 .DS_Store
 __pycache__/
 *.pyc

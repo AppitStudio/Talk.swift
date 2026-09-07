@@ -30,7 +30,7 @@ private final class PairingDelegate: NSObject, NSApplicationDelegate {
                     case "start":
                         await host.stop()
                         result = "waiting"; verification = nil
-                        try host.start(providerBundleID: Bundle.main.bundleIdentifier!, allowedCallbackBundleIDs: [peerID]) { [weak self] request in
+                        try host.start(providerBundleID: Bundle.main.bundleIdentifier!) { [weak self] request in
                             guard let self else { throw TalkError.unavailable }
                             return try await self.approve(request)
                         }

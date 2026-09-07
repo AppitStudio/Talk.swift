@@ -33,7 +33,7 @@ Provide per-row status, scopes, connect/disconnect, provider revoke, and consume
 
 ## Saved endpoint discovery and actual automation
 
-Use one retained `EndpointResolver` and forward consumer URLs to it. Resolve one installation and a fresh port for each new transport (see the starter's `connectSaved`). Pass provider URLs to `EndpointResolver.reply` with live endpoints and the consumer allowlist. Queue a bounded number while restoration is in progress. Do not use display metadata as trust.
+Use one retained `EndpointResolver` and forward consumer URLs to it. Resolve one installation and a fresh port for each new transport (see the starter's `connectSaved`). Pass provider URLs to `EndpointResolver.reply` with live endpoints. For an open provider using Talk `0.1.0-beta.2` or later, use its default generic callback policy; the original `0.1.0-beta.1` requires an explicit list and needs an upgrade to beta.2 or later to accept unknown consumers. Match setup and reconnect policy; see [pairing](pairing.md). An explicit consumer allowlist is only a deliberate closed-product restriction, not publisher authentication. Queue a bounded number while restoration is in progress. Do not use display metadata as trust.
 
 Create `TalkClient(port:credential:)`, wrap it in the generated client and call its `connect()` for authenticated negotiation. For read-only grants use the read method; only call subscribe if that scope is saved. Optional capability subsets must include everything the current workflow needs; scope possession does not make an incompatible method available.
 

@@ -38,6 +38,9 @@ public final class ExampleProvider {
     }
 
     // The host must also forward setup URLs to its DiscoverablePairingHost.receive(_:).
+    // This primitive demonstrates an explicit closed-provider routing policy.
+    // In beta.2, open providers omit the allowlist at both setup and reply; see
+    // references/pairing.md. Do not ship an open provider with a fixed consumer list.
     public func receive(_ url: URL, allowedConsumers: Set<String>) async {
         for (id, port) in await provider.endpoints() {
             EndpointResolver.reply(to: url, pairingID: id, port: port,

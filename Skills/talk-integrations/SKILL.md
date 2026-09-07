@@ -1,6 +1,6 @@
 ---
 name: talk-integrations
-description: Add or audit end-to-end Talk.swift SDK integrations between macOS apps, from package installation and provider registration to typed contracts, discoverable pairing, persistent scoped consent, calls, events, and signed-app validation. Use for apps exposing or consuming Talk capabilities.
+description: Add or audit end-to-end Talk.swift SDK integrations between macOS apps, from package installation and provider registration to typed contracts, discoverable pairing, persistent scoped consent, calls, events, and signed-app validation. Use for apps exposing or consuming Talk capabilities and for authoring their public integration guides.
 ---
 
 # Talk SDK integrations
@@ -13,7 +13,9 @@ Talk is beta software and still needs more testing and validation. State this in
 
 Inspect the host's instructions, project/package configuration, app lifecycle, signing and sandbox settings, and existing integration code. Locate the user's Talk SDK checkout or resolved package source; refer to it as `TALK_SDK_ROOT` in commands. Do not assume this skill is installed inside the SDK. If needed, request its local location while inspecting the host.
 
-Read the SDK's `Package.swift`, `Docs/INSTALLATION.md`, `Docs/INTEGRATION-GUIDE.md`, `Docs/DISCOVERABLE-PAIRING.md`, `Docs/CONTRACTS.md`, and relevant `Sources/Talk` APIs. Check `Docs/BETA-READINESS.md` for qualification limits; do not copy historical test counts into a new app's results. This skill covers beta `0.1.0-beta.1`: Swift tools 6.2, declared macOS 12.4 minimum, explicit pairing and the sole data-protection Keychain backend. If the checked-out APIs differ, adapt against that source and record the difference.
+Read the SDK's `Package.swift`, `Docs/INSTALLATION.md`, `Docs/INTEGRATION-GUIDE.md`, `Docs/DISCOVERABLE-PAIRING.md`, `Docs/CONTRACTS.md`, and relevant `Sources/Talk` APIs. Check `Docs/BETA-READINESS.md` for qualification limits; do not copy historical test counts into a new app's results. This skill covers beta `0.1.0-beta.2`: Swift tools 6.2, declared macOS 12.4 minimum, explicit pairing and the sole data-protection Keychain backend. If the checked-out APIs differ, adapt against that source and record the difference.
+
+For a public app integration, read the selected provider guide in the SDK’s `Integrations/` registry and [public guide workflow](references/guides.md). Consumer-only guides do not expose callable APIs. Use exported artifacts without requiring private app source; preserve unsupported or unreleased version limits. For guide-authoring work, follow the same reference and canonical SDK template rather than inventing another format.
 
 Determine which app exposes actions (provider), which calls them (consumer), their bundle IDs, the actual automation trigger, expected data/side effects, scopes, and whether live events are needed. For consumer-only work, use the provider's supplied contract; do not invent action IDs. An app can play both roles, with separate provider and consumer archives. Ask only for consequential details not supplied by code or user; continue independent setup work.
 
@@ -22,7 +24,8 @@ Determine which app exposes actions (provider), which calls them (consumer), the
 1. Read [installation and registration](references/installation.md). Add the remote or local package, host capabilities, embedded provider contract and URL routing. There is no cloud registration or dashboard. Registration means a signed bundle discoverable through LaunchServices, runtime handler binding, and explicit saved grants.
 2. Read [contract and generation](references/contracts.md). Define or consume the API and generate a shared contract module. Use [the starter assets](assets/Package.swift) for a new module; adapt the synthetic domain to the requested integration.
 3. Read [discoverable pairing](references/pairing.md) and [provider and consumer lifecycle](references/lifecycle.md). Default to Start Pairing → Discover → Connect, full-code comparison and visible scoped consent. Implement saved grants, URL delivery, calls/events, reconnect, revocation and recovery. Preserve an explicitly requested manual-invitation workflow.
-4. Read [validation and troubleshooting](references/validation.md). Run relevant builds, bundle checks and actual-app scenarios. Fix failures in scope and repeat affected checks. Distinguish pass, fail, blocked and not run.
+4. For settings/consent UI, read [integration UX](references/integration-ux.md) and the SDK’s `Docs/INTEGRATION-UX.md`. Use Talk Integrations with separate Apps I control (implemented outgoing library) and Apps with access (generic incoming grants); do not infer reverse permissions or supported features from discovery.
+5. Read [validation and troubleshooting](references/validation.md). Run relevant builds, bundle checks and actual-app scenarios. Fix failures in scope and repeat affected checks. Distinguish pass, fail, blocked and not run.
 
 ## SDK invariants
 
@@ -37,6 +40,6 @@ Determine which app exposes actions (provider), which calls them (consumer), the
 
 ## Scope and completion
 
-The canonical repository is `https://github.com/AppitStudio/Talk.swift.git`. Follow the host's remote dependency pin or local checkout preference; use the SDK installation guide for the `talk.swift` remote package identity. The discoverable pairing prerelease is `0.1.0-beta.1`; pin it exactly when adopting this flow. It does not establish distribution qualification. Use the session’s existing authorization for publication and signing. Do not infer authorization to change accounts, identities, profiles, system trust or Keychain policy from an integration request alone. Do not ask again for an action already authorized in the session; continue independent implementation and validation while any necessary signing input is pending.
+The canonical repository is `https://github.com/AppitStudio/Talk.swift.git`. Follow the host's remote dependency pin or local checkout preference; use the SDK installation guide for the `talk.swift` remote package identity. The discoverable pairing prerelease is `0.1.0-beta.2`; pin it exactly when adopting this flow. It does not establish distribution qualification. Use the session’s existing authorization for publication and signing. Do not infer authorization to change accounts, identities, profiles, system trust or Keychain policy from an integration request alone. Do not ask again for an action already authorized in the session; continue independent implementation and validation while any necessary signing input is pending.
 
 Deliver the changes, how to invoke the automation, the contract/scopes, validation evidence and remaining gaps. Update host task/handoff files when required. Never claim real-app success from SDK example results or a static checker.

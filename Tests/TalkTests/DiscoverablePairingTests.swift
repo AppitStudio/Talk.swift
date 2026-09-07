@@ -27,8 +27,8 @@ struct DiscoverablePairingTests {
             self?.host.receive(url)
         })
 
-        func start(lifetime: Double = 30) throws {
-            try host.start(providerBundleID: Self.providerID, allowedCallbackBundleIDs: [Self.consumerID], lifetime: lifetime) { [weak self] request in
+        func start(lifetime: Double = 30, callbacks: Set<String>? = [Harness.consumerID]) throws {
+            try host.start(providerBundleID: Self.providerID, allowedCallbackBundleIDs: callbacks, lifetime: lifetime) { [weak self] request in
                 guard let self else { throw TalkError.unavailable }
                 return try await self.approve(request)
             }
@@ -147,6 +147,50 @@ struct DiscoverablePairingTests {
         }
         #expect(h.approvals == 0)
         await h.host.stop()
+    }
+
+    @Test(arguments: [true, false])
+    func genericProviderPairsWithoutKnowingConsumer(allowed: Bool) async throws {
+        let h = Harness()
+        h.allowed = allowed
+        try h.host.start(providerBundleID: Harness.providerID) { [weak h] request in
+            guard let h else { throw TalkError.unavailable }
+            return try await h.approve(request)
+        }
+        let candidate = try await h.discover()
+        if allowed {
+            let record = try await h.connect(candidate)
+            #expect(record.scopes == ["read"])
+        } else {
+            await #expect(throws: TalkError.permissionDenied) { try await h.connect(candidate) }
+        }
+        #expect(h.approvals == 1)
+        #expect(h.verification?.count == 14)
+        #expect(!h.host.isDiscoverable)
+        await h.host.stop()
+    }
+
+    @Test func genericRoutingStillRejectsInvalidAndAmbiguousCallbacks() async throws {
+        let h = Harness()
+        try h.start(callbacks: nil)
+        for callback in ["", "app/path", "app name", "app:other", String(repeating: "x", count: 256)] {
+            h.host.receive(PairingRouting.url(scheme: "talk-spike-provider", host: "pairing-discover",
+                                              fields: ["request": UUID().uuidString, "callback": callback]))
+        }
+        #expect(h.urls.isEmpty)
+        h.callbackAvailable = false
+        await #expect(throws: TalkError.timedOut) { try await h.discover() }
+        #expect(h.approvals == 0)
+        #expect(h.host.isDiscoverable)
+        await h.host.stop()
+    }
+
+    @Test func invalidExplicitAllowlistsNeverEnablePairing() throws {
+        let h = Harness()
+        for callbacks: Set<String> in [[], ["invalid/app"], Set((0..<65).map { "dev.example.app\($0)" })] {
+            #expect(throws: TalkError.invalidInvitation) { try h.start(callbacks: callbacks) }
+            #expect(!h.host.isDiscoverable)
+        }
     }
 
     @Test func keyAgreementBindsKeysRolesAndSession() throws {

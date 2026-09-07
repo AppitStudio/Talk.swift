@@ -1,6 +1,6 @@
 # Discoverable pairing: Start Pairing → Discover → Connect
 
-Use this as the default for new integrations on Talk `0.1.0-beta.1`. Manual invitations remain an explicit alternative; the native Studio/Automator examples still demonstrate that alternative. Read the SDK’s `Docs/DISCOVERABLE-PAIRING.md` for protocol details. The skill starter supplies approval, grant-save and saved-client primitives; the host app must add the pairing service and visible consent UI described here.
+Use this as the default for new integrations on Talk `0.1.0-beta.2`. Manual invitations remain an explicit alternative; the native Studio/Automator examples still demonstrate that alternative. Read the SDK’s `Docs/DISCOVERABLE-PAIRING.md` for protocol details. The skill starter supplies approval, grant-save and saved-client primitives; the host app must add the pairing service and visible consent UI described here.
 
 ## App-owned state and routing
 
@@ -9,6 +9,8 @@ Use this as the default for new integrations on Talk `0.1.0-beta.1`. Manual invi
 | Provider | `TalkProvider`, `DiscoverablePairingHost`, one `IntegrationStore` | Forward to `pairingHost.receive(_:)` and reply to saved endpoint requests using `EndpointResolver.reply` with current endpoints. |
 | Consumer | `PairingDiscovery`, `EndpointResolver`, one `IntegrationStore` | Forward to both `discovery.receive(_:)` and `resolver.receive(_:)`. |
 
+For an open provider on Talk `0.1.0-beta.2` or later, also omit the optional allowlist in `EndpointResolver.reply`; setup and saved reconnect must use the same policy. Explicit lists remain supported, but never construct a purported trusted list from a request callback field. The SDK validates callback shape and the unique running receiver; paired TLS and scoped consent remain the authority.
+
 Use the fixed `talk-spike-provider` and `talk-spike-consumer` schemes alongside the app’s existing schemes. Buffer a bounded number of cold-launch URLs until normal startup/storage restoration completes. App-owned services outlive individual settings views. Do not start pairing from launch, URL receipt, discovery, reconnect, or an automatic retry.
 
 Keep distinct UI states for idle, discoverable, discovering, candidate selected, awaiting consent, saving and saved/connected. `isDiscoverable == false` can mean the single attempt was consumed while consent is still pending; it does not mean the host is ready to restart. Keep an active-mode/generation guard until teardown. Disable conflicting permission, replacement, reload and pairing actions across awaits.
@@ -16,7 +18,7 @@ Keep distinct UI states for idle, discoverable, discovering, candidate selected,
 ## Provider: Start Pairing and consent
 
 1. On the user’s Start Pairing action, freeze the label, exact scopes and optional selected replacement credential ID. Stop any previous completed/cancelled host before starting another mode; serialize stop/start so concurrent UI actions cannot replace each other.
-2. Call `start(providerBundleID:allowedCallbackBundleIDs:lifetime:approve:)`. The returned `Date` is the expiry to display; the default and maximum lifetime are 300 seconds. Show Cancel Pairing and a countdown. An optional shortcut may open the consumer’s own settings URL; that URL must not carry a secret or grant.
+2. In Talk `0.1.0-beta.2`, call `start(providerBundleID:lifetime:approve:)` with the default generic routing policy. `0.1.0-beta.1` instead requires an explicit `allowedCallbackBundleIDs` set; that older closed-provider API cannot satisfy unknown-consumer discovery. Upgrade to `0.1.0-beta.2` or later before promising open integrations. Keep an explicit list only for a deliberately closed product policy; it is routing, not publisher authentication. The returned `Date` is the expiry to display; the default and maximum lifetime are 300 seconds. Show Cancel Pairing and a countdown. An optional shortcut may open the consumer’s own settings URL; that URL must not carry a secret or grant.
 3. The closure receives `DiscoverablePairingHost.Request`. Display its full `verificationCode` alongside the frozen scopes. `consumerBundleID` is an untrusted routing label. Require a fresh, initially unchecked “The code matches in both apps” checkbox; disable approval and its keyboard shortcut until checked. Do not infer a match from the allowlist or auto-confirm it in the app.
 4. Await the visible decision with cancellation-aware UI. Deny or window close throws `TalkError.permissionDenied`; consumer disconnect, provider Cancel, expiry or shutdown must dismiss consent and finish its waiting continuation. Before approval, check cancellation and the current mode generation.
 5. Create a fresh `PairingCredential` and `PairingRecord` with the frozen scopes, provider bundle hint, label and `replacesID`. Call `TalkProvider.approve(record)` and return the same record only after save succeeds. The starter’s `approveAfterConsent` supplies this primitive. Keep the host alive through response delivery; do not stop it inside the successful approval closure.

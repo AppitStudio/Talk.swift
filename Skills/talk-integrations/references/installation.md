@@ -4,9 +4,9 @@
 
 Set `TALK_SDK_ROOT` to the actual checkout in the invoking shell. Check its `Package.swift`: the current toolchain floor is Swift 6.2, with declared macOS 12.4 deployment support. Use the host's supported Xcode toolchain and Swift 6 concurrency checking for new integration code. Compare default actor isolation across targets; keep generated DTOs in a nonisolated module.
 
-For Xcode, add `https://github.com/AppitStudio/Talk.swift.git` at exact beta version `0.1.0-beta.1` or a reviewed commit, or use the SDK directory as a local package. Link `Talk` to each participating app. Add a shared contract library to both apps. Preserve existing configurations and entitlements. The SDK's `StudioContract` is demo-specific; real integrations get their own contract.
+For Xcode, add `https://github.com/AppitStudio/Talk.swift.git` at exact beta version `0.1.0-beta.2` or a reviewed commit, or use the SDK directory as a local package. Link `Talk` to each participating app. Add a shared contract library to both apps. Preserve existing configurations and entitlements. The SDK's `StudioContract` is demo-specific; real integrations get their own contract.
 
-The SDK's `Docs/INSTALLATION.md` contains a complete remote SwiftPM manifest using `package: "talk.swift"`. The published discoverable-pairing prerelease is `0.1.0-beta.1`. Keep the skill compatible with the resolved SDK API; documentation on main may include later corrections without changing the SDK tag.
+The SDK's `Docs/INSTALLATION.md` contains a complete remote SwiftPM manifest using `package: "talk.swift"`. The published discoverable-pairing prerelease is `0.1.0-beta.2`. Keep the skill compatible with the resolved SDK API; documentation on main may include later corrections without changing the SDK tag.
 
 For a local SwiftPM dependency, [the starter Package.swift](../assets/Package.swift) demonstrates the explicit local dependency alias `TalkSDK`, a shared target depending on `Talk`, and `TalkClientPlugin`. Adapt the dependency path to the host layout. Keep `Contract.talk.json` at the contract target root and exclude it from ordinary sources. A tiny ordinary Swift file ensures SwiftPM recognizes a source target before plugin generation. Do not hand-define DTOs also emitted by the generator.
 

@@ -19,10 +19,17 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--stage', action='store_true', help='Create a source-only local review copy')
 parser.add_argument('--check-index', action='store_true', help='Require the Git index to match audited working files exactly')
 args = parser.parse_args()
-folders = ['Sources', 'Tests', 'Examples', 'Plugins', 'Scripts', 'Skills']
+folders = ['Sources', 'Tests', 'Examples', 'Plugins', 'Scripts', 'Skills', 'Integrations']
 root_files = ['Package.swift', 'README.md', 'SECURITY.md', 'CONTRIBUTING.md', '.gitignore', '.gitattributes']
+website_files = [
+    'Website/.gitignore', 'Website/README.md', 'Website/index.html',
+    'Website/package.json', 'Website/package-lock.json', 'Website/vite.config.js',
+    'Website/src/main.js', 'Website/src/style.css', 'Website/public/favicon.svg',
+    'Website/public/manrope-license.txt',
+]
 doc_files = [
-    'DISCOVERABLE-PAIRING.md', 'INSTALLATION.md', 'INTEGRATION-GUIDE.md', 'EXAMPLES.md', 'LLM-INTEGRATION.md',
+    'DISCOVERABLE-PAIRING.md', 'INSTALLATION.md', 'INTEGRATION-GUIDE.md', 'INTEGRATION-UX.md',
+    'INTEGRATION-GUIDE-AUTHORING.md', 'EXAMPLES.md', 'LLM-INTEGRATION.md',
     'CONTRACTS.md', 'CREDENTIAL-LIFECYCLE.md', 'SECURITY-NOTES.md',
     'BETA-READINESS.md', 'QUALIFICATION.md', 'LOCAL-HARDENING.md',
     'READINESS-VALIDATION.md', 'PROCESS-VALIDATION.md',
@@ -41,7 +48,7 @@ patterns = {
     'encoded-pairing': re.compile(r'talk-pair-v1:[A-Za-z0-9+/]{30,}={0,2}'),
     'private-evidence-reference': re.compile(r'LocalBuild/[^\s`]*20\d{6}T\d{6}'),
 }
-files = [root / p for p in root_files] + [root / 'Docs' / p for p in doc_files]
+files = [root / p for p in root_files + website_files] + [root / 'Docs' / p for p in doc_files]
 issues = []
 
 
@@ -147,7 +154,7 @@ output = Path(tempfile.mkdtemp(prefix=datetime.now(timezone.utc).strftime('%Y%m%
 report = {
     'audit': 'failed' if issues else 'passed', 'fileCount': len(manifest), 'issues': issues,
     'licensePresent': (root / 'LICENSE').is_file(), 'gitIndexChecked': args.check_index,
-    'excluded': ['LocalBuild/', '.build/', '.swiftpm/', 'AGENTS.md', 'TASKS.md',
+    'excluded': ['LocalBuild/', '.build/', '.swiftpm/', 'Website/node_modules/', 'Website/dist/', 'AGENTS.md', 'TASKS.md',
                  'Docs/HANDOFF.md', 'Docs/DECISIONS.md', 'talk-sdk-spec.md', 'talk-sdk-review.md'],
     'limitations': 'Pattern and allowlist audit; not a complete secret scan or independent security review.',
 }

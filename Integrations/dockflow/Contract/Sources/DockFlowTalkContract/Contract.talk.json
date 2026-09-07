@@ -1,0 +1,134 @@
+{
+  "actions" : [
+    {
+      "id" : "dockflow.presets.read",
+      "input" : "Void",
+      "method" : "snapshot",
+      "mutation" : false,
+      "output" : "DockFlowPresetsSnapshot",
+      "scope" : "dockflow.presets.read",
+      "symbol" : "read"
+    },
+    {
+      "id" : "dockflow.presets.apply",
+      "input" : "ApplyPresetRequest",
+      "method" : "applyPreset",
+      "mutation" : true,
+      "output" : "ApplyPresetResult",
+      "scope" : "dockflow.presets.apply",
+      "symbol" : "apply"
+    },
+    {
+      "id" : "dockflow.presets.observe",
+      "input" : "Void",
+      "method" : "subscribe",
+      "mutation" : false,
+      "output" : "DockFlowPresetsSnapshot",
+      "scope" : "dockflow.presets.observe",
+      "symbol" : "observe"
+    }
+  ],
+  "contractID" : "com.appit.dockflow.presets",
+  "contractVersion" : "1.0.0",
+  "events" : [
+    {
+      "id" : "dockflow.presets.changed",
+      "payload" : "DockFlowPresetsSnapshot",
+      "symbol" : "changed"
+    }
+  ],
+  "name" : "DockFlowPresets",
+  "schemaVersion" : 1,
+  "types" : [
+    {
+      "fields" : [
+        {
+          "name" : "id",
+          "type" : "UUID"
+        },
+        {
+          "name" : "name",
+          "type" : "String"
+        },
+        {
+          "name" : "order",
+          "type" : "Int64"
+        },
+        {
+          "name" : "appCount",
+          "type" : "Int64"
+        },
+        {
+          "name" : "extraDockOnly",
+          "type" : "Bool"
+        }
+      ],
+      "kind" : "struct",
+      "name" : "DockFlowPreset"
+    },
+    {
+      "fields" : [
+        {
+          "name" : "sessionID",
+          "type" : "UUID"
+        },
+        {
+          "name" : "revision",
+          "type" : "Int64"
+        },
+        {
+          "name" : "activePresetID",
+          "type" : "UUID?"
+        },
+        {
+          "name" : "applyInProgress",
+          "type" : "Bool"
+        },
+        {
+          "name" : "presets",
+          "type" : "[DockFlowPreset]"
+        }
+      ],
+      "kind" : "struct",
+      "name" : "DockFlowPresetsSnapshot"
+    },
+    {
+      "fields" : [
+        {
+          "name" : "id",
+          "type" : "UUID"
+        }
+      ],
+      "kind" : "struct",
+      "name" : "ApplyPresetRequest"
+    },
+    {
+      "cases" : [
+        "accepted",
+        "cooldown",
+        "notFound",
+        "rejected"
+      ],
+      "kind" : "enum",
+      "name" : "ApplyPresetOutcome"
+    },
+    {
+      "fields" : [
+        {
+          "name" : "outcome",
+          "type" : "ApplyPresetOutcome"
+        },
+        {
+          "name" : "message",
+          "type" : "String?"
+        },
+        {
+          "name" : "snapshot",
+          "type" : "DockFlowPresetsSnapshot"
+        }
+      ],
+      "kind" : "struct",
+      "name" : "ApplyPresetResult"
+    }
+  ]
+}

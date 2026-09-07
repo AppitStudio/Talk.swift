@@ -30,6 +30,15 @@ enum PairingRouting {
         }
     }
 
+    static func validCallbackAllowlist(_ allowlist: Set<String>?) -> Bool {
+        guard let allowlist else { return true }
+        return !allowlist.isEmpty && allowlist.count <= 64 && allowlist.allSatisfy(validBundleID)
+    }
+
+    static func allowsCallback(_ bundleID: String, allowlist: Set<String>?) -> Bool {
+        validBundleID(bundleID) && validCallbackAllowlist(allowlist) && (allowlist?.contains(bundleID) ?? true)
+    }
+
     @MainActor static func callback(_ bundleID: String) -> URL? {
         EndpointResolver.uniqueRunningCallback(NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).map(\.bundleURL))
     }

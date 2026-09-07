@@ -19,6 +19,7 @@ The declared runtime minimum is **macOS 12.4**; actual Monterey runtime validati
 - **Protected credentials:** each app stores its own grants in its app-specific data-protection Keychain group.
 - **Calls and live events:** compatibility negotiation, bounded queues, cancellation, and snapshot-based resubscription.
 - **Runnable examples and an LLM skill:** learn the complete flow or bring the integration workflow into your coding agent.
+- **Public app integration guides:** consume an app's documented contract without access to its implementation, or publish your own using one validated template.
 
 ```mermaid
 flowchart LR
@@ -41,7 +42,7 @@ Cancel or denial ends the attempt; retry starts with an explicit new pairing mod
 
 Requires **Swift 6.2+** and a compatible macOS toolchain. The tested toolchain is Xcode 26.2 / Swift 6.2.3. Saved pairing requires correctly Apple-signed and provisioned app targets; an unsigned command-line build alone cannot validate persistence.
 
-In Xcode, add this package URL, select the exact beta version `0.1.0-beta.1`, and link the **Talk** product to each participating app:
+In Xcode, add this package URL, select the exact beta version `0.1.0-beta.2`, and link the **Talk** product to each participating app:
 
 ```text
 https://github.com/AppitStudio/Talk.swift.git
@@ -51,7 +52,7 @@ For a Swift package:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/AppitStudio/Talk.swift.git", exact: "0.1.0-beta.1")
+    .package(url: "https://github.com/AppitStudio/Talk.swift.git", exact: "0.1.0-beta.2")
 ]
 ```
 
@@ -69,11 +70,18 @@ The [installation guide](Docs/INSTALLATION.md) covers a complete package manifes
 
 Start with the [end-to-end integration guide](Docs/INTEGRATION-GUIDE.md). It includes typechecked provider and consumer code drawn from the runnable examples.
 
+Give users one **Talk Integrations** settings destination with **Apps I control** (a developer-authored App Library) and **Apps with access** (generic approved incoming clients). A provider exposes its API once; a consumer deliberately implements the APIs its features use. The same app can do both with separate grants. Follow the [integration UX guide](Docs/INTEGRATION-UX.md) for pairing, statuses, permission management and empty states.
+
+`0.1.0-beta.2` adds generic callback routing so providers can accept future compatible clients without maintaining a consumer allowlist. Use this version or later for both pairing and saved reconnect; see [version requirements](Docs/INTEGRATION-UX.md#two-directions-two-sources-of-truth).
+
 | Guide | Use it for |
 | --- | --- |
 | [Installation](Docs/INSTALLATION.md) | Xcode / SwiftPM setup, signing, and sandbox requirements |
 | [Discoverable pairing](Docs/DISCOVERABLE-PAIRING.md) | Pairing mode, discovery, code verification and consent |
 | [Integration](Docs/INTEGRATION-GUIDE.md) | Provider handlers, pairing, clients, events, and lifecycle |
+| [Integration UX](Docs/INTEGRATION-UX.md) | Two directions, App Library, consent, statuses and access management |
+| [Public app guides](Integrations/README.md) | Integrate with DockFlow using its public contract; inspect app roles |
+| [Publish an app guide](Docs/INTEGRATION-GUIDE-AUTHORING.md) | One template, deterministic scaffolding and validation |
 | [Contracts](Docs/CONTRACTS.md) | Supported types, code generation, and directional compatibility |
 | [Example apps](Docs/EXAMPLES.md) | Build and pair Talk Studio and Talk Automator |
 | [LLM-assisted integration](Docs/LLM-INTEGRATION.md) | Install the skill and use it in an existing app project |
@@ -95,6 +103,8 @@ and scoped consent. Validate cancellation, saved reconnect, restart, and revocat
 ```
 
 The skill supports provider-only, consumer-only, or both-role work. Other coding agents can read its `SKILL.md` and linked resources directly.
+
+To integrate with a published app without its private source, supply its [app guide](Integrations/README.md) and the behavior you want. To expose your own app, ask the same skill to create an integration guide from the canonical template and validate it against the actual exported contract. Neither workflow needs a hosted LLM service in your app.
 
 ## Build and contribute
 

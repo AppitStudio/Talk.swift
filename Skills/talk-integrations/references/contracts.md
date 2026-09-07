@@ -1,6 +1,6 @@
 # Contract and generation
 
-For a new provider, adapt [the synthetic contract](../assets/Sources/IntegrationContract/Contract.talk.json). It generates `ExampleAPI`, `ExampleClient`, `Snapshot`, `SetValue`, read/set/observe methods and a changed event. For an existing provider, pin its supplied contract; discovery metadata is not a trusted API definition.
+For a new provider, adapt [the synthetic contract](../assets/Sources/IntegrationContract/Contract.talk.json). It generates `ExampleAPI`, `ExampleClient`, `Snapshot`, `SetValue`, read/set/observe methods and a changed event. For an existing provider, pin its supplied contract and public app guide; discovery metadata is not a trusted API definition. Read [public app guides](guides.md) when consuming or publishing that portable contract. Consumer-only app guides expose no callable API.
 
 Choose stable contract/action IDs and scopes. `name` controls Swift prefixes, `symbol` creates an API constant, and `method` creates a client method. Action IDs and scope strings are independent: use `ExampleAPI.actions[actionID]` or explicit scope constants for consent UI. Do not assume generated action constants are scope strings.
 

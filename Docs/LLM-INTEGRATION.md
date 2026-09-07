@@ -28,7 +28,7 @@ else
 fi
 ```
 
-Start a new Codex session in your app project and invoke `$talk-integrations`. Supply the actual SDK checkout location or resolved package source. The copied skill does not include the full SDK; review skill updates alongside the resolved SDK API. The current skill targets `0.1.0-beta.1`; documentation on main may contain later corrections without changing that SDK tag. If you installed a copy, review and refresh the whole directory, including references/assets. If your installed skill is a symlink to this checkout, updating the checkout updates the skill too. Preserve any local skill customizations. Installing the skill does not modify or sign your apps.
+Start a new Codex session in your app project and invoke `$talk-integrations`. Supply the actual SDK checkout location or resolved package source. The copied skill does not include the full SDK; review skill updates alongside the resolved SDK API. The current skill targets `0.1.0-beta.2`; documentation on main may contain later corrections without changing that SDK tag. If you installed a copy, review and refresh the whole directory, including references/assets. If your installed skill is a symlink to this checkout, updating the checkout updates the skill too. Preserve any local skill customizations. Installing the skill does not modify or sign your apps.
 
 ## Other coding agents
 
@@ -51,6 +51,19 @@ permission replacement, and revocation.
 ```
 
 For consumer-only work, supply the provider's actual contract. The agent should not invent action IDs or infer permissions from discovery metadata. For provider-only work, describe the capabilities, scope boundaries, and side effects you want exposed.
+
+When the provider's source is private, supply its [public app guide](../Integrations/README.md). The DockFlow guide ships the schema and a generated-contract package needed by an external consumer. The guide's availability and version requirements are separate from the SDK's declared minimum.
+
+```text
+Use $talk-integrations and Integrations/dockflow/GUIDE.md to add a DockFlow
+integration to my app. Use only the public guide and contract; do not assume
+access to DockFlow source. Add DockFlow to Apps I control in Talk Integrations,
+wire the feature I describe to the typed API, and validate the actual signed pair.
+```
+
+To publish your own app's API, use the same [canonical template and authoring workflow](INTEGRATION-GUIDE-AUTHORING.md). The skill inspects source, describes semantics and runs a deterministic scaffold/check command. There is no required hosted model, model API key or AI dependency in the SDK. Human review still owns the promised semantics and recorded runtime evidence.
+
+All integrations should follow [Integration UX](INTEGRATION-UX.md): Apps I control is a deliberate outgoing App Library; Apps with access is generic incoming saved consent. A dual-role app keeps each direction's lifecycle and permissions separate.
 
 Existing authorized signing configuration can be used. If signing or native UI access is unavailable, the agent can still implement and compile the integration, then report the exact runtime checks left untested. Do not supply pairing codes, credentials, signing keys, or private profiles in prompts.
 

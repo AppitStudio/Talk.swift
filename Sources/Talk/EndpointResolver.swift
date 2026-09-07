@@ -48,31 +48,36 @@ public final class EndpointResolver {
         }
     }
 
-    public static func reply(to url: URL, pairingID: UUID, port: UInt16, allowedCallbackBundleIDs: Set<String>) {
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              components.scheme == "talk-spike-provider", components.host == "connect",
-              let items = components.queryItems, items.count == 3,
-              items.first(where: { $0.name == "pairing" })?.value == pairingID.uuidString,
-              let request = items.first(where: { $0.name == "request" })?.value, UUID(uuidString: request) != nil,
-              let callback = items.first(where: { $0.name == "callback" })?.value,
-              allowedCallbackBundleIDs.contains(callback),
+    /// Replies with a public port hint for an existing grant. The default can
+    /// route to any valid, uniquely running callback app; an optional allowlist
+    /// restricts routing. Possession of the saved TLS key still gates access.
+    public static func reply(to url: URL, pairingID: UUID, port: UInt16, allowedCallbackBundleIDs: Set<String>? = nil) {
+        guard let reply = response(to: url, pairingID: pairingID, port: port, allowedCallbackBundleIDs: allowedCallbackBundleIDs),
               let applicationURL = uniqueRunningCallback(
-                NSRunningApplication.runningApplications(withBundleIdentifier: callback).map(\.bundleURL)) else { return }
-        var response = URLComponents()
-        response.scheme = "talk-spike-consumer"
-        response.host = "endpoint"
-        response.queryItems = [URLQueryItem(name: "request", value: request), URLQueryItem(name: "port", value: String(port))]
-        guard let responseURL = response.url else { return }
+                NSRunningApplication.runningApplications(withBundleIdentifier: reply.callback).map(\.bundleURL)) else { return }
         let configuration = NSWorkspace.OpenConfiguration()
         configuration.activates = false
         configuration.addsToRecentItems = false
         configuration.allowsRunningApplicationSubstitution = false
-        NSWorkspace.shared.open([responseURL], withApplicationAt: applicationURL, configuration: configuration) { _, error in
+        NSWorkspace.shared.open([reply.url], withApplicationAt: applicationURL, configuration: configuration) { _, error in
             if let error {
                 // Opt-in, bounded diagnostics; never include URLs or error text.
                 TransportDiagnostics.record("callback open-failed code=\((error as NSError).code)")
             }
         }
+    }
+
+    static func response(to url: URL, pairingID: UUID, port: UInt16,
+                         allowedCallbackBundleIDs: Set<String>? = nil) -> (url: URL, callback: String)? {
+        guard port > 0,
+              let fields = PairingRouting.fields(url, scheme: "talk-spike-provider", host: "connect",
+                                                 names: ["pairing", "request", "callback"]),
+              fields["pairing"] == pairingID.uuidString,
+              let request = fields["request"], UUID(uuidString: request) != nil,
+              let callback = fields["callback"],
+              PairingRouting.allowsCallback(callback, allowlist: allowedCallbackBundleIDs) else { return nil }
+        return (PairingRouting.url(scheme: "talk-spike-consumer", host: "endpoint",
+                                  fields: ["request": request, "port": String(port)]), callback)
     }
 
     /// Count processes, not paths: two running copies at one URL are still

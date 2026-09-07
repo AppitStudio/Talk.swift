@@ -1,6 +1,6 @@
 # Discoverable pairing
 
-Available in **0.1.0-beta.1**. Users can pair two local apps without copying a secret:
+Discoverable pairing was introduced in **0.1.0-beta.1**; use **0.1.0-beta.2** for the generic callback default. Users can pair two local apps without copying a secret:
 
 1. In the provider, select permissions and click **Start Pairing**.
 2. In the consumer, **Discover** the provider, then click **Connect**.
@@ -12,6 +12,10 @@ Talk remains beta. Validate the complete flow in your actual signed apps and use
 ## Provider wiring
 
 Retain a `DiscoverablePairingHost` in a main-actor app service. Only the user's Start Pairing action calls `start(providerBundleID:allowedCallbackBundleIDs:lifetime:approve:)`. The default lifetime is 300 seconds, which is also the maximum. Freeze the chosen scopes, label and optional replacement ID for that mode.
+
+`0.1.0-beta.2` makes `allowedCallbackBundleIDs` optional, defaulting to `nil`: any syntactically valid callback with exactly one running receiver may receive public setup hints. Omit it for a provider that should accept future compatible consumers without code changes. Omit it on `EndpointResolver.reply` as well so their saved connections can reconnect. The earlier `0.1.0-beta.1` requires an explicit list; upgrade both call sites to `0.1.0-beta.2` or later for a generic provider. An explicitly supplied nonempty set still limits routing and is bounded to 64 valid identifiers. It is not an identity check or an authorization grant.
+
+Use the [Talk Integrations UX](INTEGRATION-UX.md) to separate a consumer's developer-authored App Library from a provider's generic incoming access. Do not infer an outgoing feature from a discovered app, or enable reverse-direction access when pairing.
 
 The approval closure receives a `DiscoverablePairingHost.Request` with an untrusted `consumerBundleID` routing label and a `verificationCode`. Present that code in the provider's visible consent UI. Disable approval until the user explicitly confirms it matches the consumer. On approval, check task cancellation and the current mode generation, create a fresh `PairingCredential` and `PairingRecord` with exactly the frozen scopes, call `TalkProvider.approve`, and return that record. Denial throws `TalkError.permissionDenied`.
 

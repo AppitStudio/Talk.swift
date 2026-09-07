@@ -15,7 +15,7 @@ public final class DiscoverablePairingHost {
     private struct Session {
         let id: UUID
         let provider: String
-        let callbacks: Set<String>
+        let callbacks: Set<String>?
         let identity: Curve25519.KeyAgreement.PrivateKey
         let expiresAt: Date
         let approve: Approve
@@ -40,14 +40,16 @@ public final class DiscoverablePairingHost {
 
     /// Ends after at most five minutes or one connection attempt. Call `stop`
     /// before starting another mode, including after denial or disconnection.
+    /// Omit `allowedCallbackBundleIDs` to support future consumers without a
+    /// provider update. A supplied set restricts public callback routing only;
+    /// neither it nor the default establishes the other app's identity.
     @discardableResult
-    public func start(providerBundleID: String, allowedCallbackBundleIDs: Set<String>, lifetime: Double = 300,
+    public func start(providerBundleID: String, allowedCallbackBundleIDs: Set<String>? = nil, lifetime: Double = 300,
                       approve: @escaping Approve) throws -> Date {
         guard session == nil, host == nil else { throw TalkError.busy }
         guard lifetime.isFinite, lifetime > 0, lifetime <= 300,
-              PairingRouting.validBundleID(providerBundleID), !allowedCallbackBundleIDs.isEmpty,
-              allowedCallbackBundleIDs.count <= 64,
-              allowedCallbackBundleIDs.allSatisfy(PairingRouting.validBundleID) else { throw TalkError.invalidInvitation }
+              PairingRouting.validBundleID(providerBundleID),
+              PairingRouting.validCallbackAllowlist(allowedCallbackBundleIDs) else { throw TalkError.invalidInvitation }
         let deadline = Date().addingTimeInterval(lifetime)
         generation = UUID()
         discoveryReplies = 0
@@ -82,7 +84,7 @@ public final class DiscoverablePairingHost {
         if let fields = PairingRouting.fields(url, scheme: "talk-spike-provider", host: "pairing-discover",
                                               names: ["request", "callback"]),
            let request = fields["request"], UUID(uuidString: request) != nil,
-           let consumer = fields["callback"], session.callbacks.contains(consumer),
+           let consumer = fields["callback"], PairingRouting.allowsCallback(consumer, allowlist: session.callbacks),
            let target = callback(consumer), discoveryReplies < 32 {
             discoveryReplies += 1
             send(PairingRouting.url(scheme: "talk-spike-consumer", host: "pairing-available", fields: [
@@ -96,7 +98,7 @@ public final class DiscoverablePairingHost {
                                                  names: ["request", "callback", "session", "key"]),
               let rawRequest = fields["request"], let requestID = UUID(uuidString: rawRequest),
               fields["session"] == session.id.uuidString,
-              let consumer = fields["callback"], session.callbacks.contains(consumer),
+              let consumer = fields["callback"], PairingRouting.allowsCallback(consumer, allowlist: session.callbacks),
               let rawKey = fields["key"], let consumerKey = Data(base64Encoded: rawKey), consumerKey.count == 32,
               let target = callback(consumer), keyAttempts < 8 else { return }
         keyAttempts += 1
