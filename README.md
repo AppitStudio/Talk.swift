@@ -8,7 +8,7 @@ Built for macOS developers adding integrations to their apps, and for coding age
 
 > **Beta — use with caution.** Talk still needs more testing and validation. APIs and behavior can change. Evaluate it with synthetic or noncritical data, and validate your actual signed apps before relying on an integration. This beta is not a production-readiness or security guarantee.
 
-The declared runtime minimum is **macOS 12.4**; actual Monterey runtime validation is pending. Current native validation covers macOS 15.7.9 on Apple silicon with Apple Development signing. Distribution signing, unrelated developer teams, additional platforms, and independent security review remain open. See [status and qualification](Docs/BETA-READINESS.md).
+The declared runtime minimum is **macOS 12.4**; actual Monterey runtime validation is pending. Current native validation covers macOS 15.7.9 on Apple silicon: Apple Development examples/storage probes and a locally Developer ID-signed DockFlow/ExtraBar pairing flow. Delivered-update/distribution qualification, unrelated developer teams, additional platforms, and independent security review remain open. See [status and qualification](Docs/BETA-READINESS.md).
 
 ## What you get
 
@@ -27,6 +27,15 @@ flowchart LR
 ```
 
 Pairing proves possession of the paired credential. Displayed app names and bundle IDs are routing hints, not verified publisher identities. Mutations are never automatically replayed after a timeout or disconnect; their outcome may be uncertain. Events are live delivery without durable replay. Read the [security model](Docs/SECURITY-NOTES.md) before designing your integration.
+
+## Pair without copying secrets
+
+1. In the provider app, choose permissions and click **Start Pairing**. Pairing mode accepts one valid attempt and expires after at most five minutes.
+2. In the consumer app, click **Discover**, select the intended provider, then **Connect**. Discovery cannot turn on pairing in the other app.
+3. Compare the entire verification code in both apps. Confirm it matches in the provider’s consent UI, then approve the displayed permissions.
+4. Both apps save their own grant. Later permitted automation reconnects with pairing mode off and no new consent prompt.
+
+Cancel or denial ends the attempt; retry starts with an explicit new pairing mode. Use `DiscoverablePairingHost` in the provider and `PairingDiscovery` in the consumer. The [pairing guide](Docs/DISCOVERABLE-PAIRING.md) covers ownership, callbacks and trust boundaries. Manual invitations remain supported; the Studio/Automator examples currently demonstrate that alternative.
 
 ## Install
 
@@ -53,8 +62,8 @@ The [installation guide](Docs/INSTALLATION.md) covers a complete package manifes
 ## Integrate two apps
 
 1. **Define a contract.** Give actions and events stable IDs, narrow permission scopes, and concrete DTOs. Generate the shared Swift contract/client module.
-2. **Implement the provider.** Bind actions to app behavior, restore saved grants at startup, and present visible scoped consent for new pairing.
-3. **Implement the consumer.** Save the approved grant, resolve the provider, and use the generated client from your app's actual automation trigger.
+2. **Implement the provider.** Bind actions to app behavior, restore saved grants at startup, and add Start Pairing with code comparison and visible scoped consent.
+3. **Implement the consumer.** Add Discover and Connect, display the comparison code, save the approved grant, and use the generated client from your app’s actual automation trigger.
 4. **Own the lifecycle.** Handle live events, disconnects, uncertain mutation outcomes, permission replacement, revocation, and protected-storage recovery.
 5. **Validate the signed apps.** Test permitted and denied operations, restart, cold launch, and durable revocation in your actual app pair.
 
@@ -73,7 +82,7 @@ Start with the [end-to-end integration guide](Docs/INTEGRATION-GUIDE.md). It inc
 
 ## Use with a coding agent
 
-The repository includes the portable [talk-integrations skill](Skills/talk-integrations/SKILL.md), its references, a compilable starter, and a read-only signed-bundle validator.
+The repository includes the portable [talk-integrations skill](Skills/talk-integrations/SKILL.md), a [dedicated discoverable-pairing workflow](Skills/talk-integrations/references/pairing.md), a compilable starter, and a read-only signed-bundle validator. Discoverable pairing is the default for new integrations.
 
 After [installing the skill](Docs/LLM-INTEGRATION.md), invoke it in your app project:
 
@@ -81,7 +90,8 @@ After [installing the skill](Docs/LLM-INTEGRATION.md), invoke it in your app pro
 $talk-integrations Add a Talk integration between my workspace app (provider)
 and focus app (consumer). Expose reading and selecting scenes, plus scene-change
 events. Starting a focus session should select the Focus scene. Use the Talk.swift
-checkout I provide and validate pairing, saved consent, restart, and revocation.
+checkout I provide. Add Start Pairing → Discover → Connect with full-code comparison
+and scoped consent. Validate cancellation, saved reconnect, restart, and revocation.
 ```
 
 The skill supports provider-only, consumer-only, or both-role work. Other coding agents can read its `SKILL.md` and linked resources directly.

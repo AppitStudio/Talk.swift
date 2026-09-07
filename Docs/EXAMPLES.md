@@ -1,5 +1,7 @@
 # Run the example apps
 
+These native examples currently demonstrate the **manual invitation alternative**. For new app integrations, use [discoverable pairing](DISCOVERABLE-PAIRING.md): Start Pairing → Discover → Connect with full-code comparison. The portable skill defaults to that flow; examples still provide reusable contract, storage and session-lifecycle code.
+
 Both examples target macOS 12.4 or later. Build them with the Swift 6.2+ toolchain described in [installation](INSTALLATION.md); the build host can require a newer OS than the apps.
 
 **Talk Studio** exposes synthetic scene state, scene-selection actions, and change events. **Talk Automator** starts and ends focus sessions and uses saved permission to select Studio scenes. Both use the same production credential backend as the SDK.

@@ -22,8 +22,9 @@ public final class ExampleProvider {
 
     public func start() async throws { try await provider.restore() }
 
-    // Call only after the retained PairingHost approval closure receives visible consent.
-    // The UI must freeze scopes/replacement/label per invitation and handle cancellation.
+    // Call from the retained DiscoverablePairingHost approval closure only after visible
+    // scoped consent and full-code comparison. Freeze scopes/replacement/label per mode.
+    // The host app supplies cancellation-aware UI; see references/pairing.md.
     public func approveAfterConsent(scopes: Set<String>, replacing id: UUID? = nil,
                                     label: String? = nil) async throws -> PairingRecord {
         try Task.checkCancellation()
@@ -36,6 +37,7 @@ public final class ExampleProvider {
         return record
     }
 
+    // The host must also forward setup URLs to its DiscoverablePairingHost.receive(_:).
     public func receive(_ url: URL, allowedConsumers: Set<String>) async {
         for (id, port) in await provider.endpoints() {
             EndpointResolver.reply(to: url, pairingID: id, port: port,

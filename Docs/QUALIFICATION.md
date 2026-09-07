@@ -1,10 +1,26 @@
-# Native and security qualification — 6 September 2026
+# Native and security qualification — updated 7 September 2026
 
 The current deployment minimum is macOS 12.4. Both architecture builds are checked, but actual Monterey runtime qualification remains open. Native matrix results below were recorded on macOS 15.7.9; they do not establish behavior on 12.4.
 
-The native example matrix below was completed before the macOS 12.4 scene update on the tested host. Security qualification has additional local evidence, but remains open for unrelated-team, distribution, certificate-change, and independent review. Real-app and broader platform qualification remain separate work. This source is published as a development preview.
+The native example matrix below was completed before the macOS 12.4 scene update on the tested host. Security qualification has additional local evidence, but remains open for unrelated-team, distribution, certificate-change, and independent review. Targeted real-app discoverable-pairing evidence is recorded below; broader app and platform qualification remain separate work. This source is published as a development preview.
 
 Host: macOS 15.7.9 arm64, Swift 6.2.3 / Xcode 26.2. This is a bounded implementation/validation pass, not an independent security audit or a claim that all vulnerabilities are absent.
+
+## Discoverable pairing in real apps — 7 September 2026
+
+Published `0.1.0-beta.1` was integrated into DockFlow and ExtraBar. Both apps were tested as local Developer ID-signed Release installations on the host above, using matching authorized profiles and the existing certificate. ExtraBar profile creation/download was separately authorized. No binary upload or notarization was performed.
+
+The 21 targeted native checks passed: normal licensing and protected-store startup; discovery with pairing off; explicit Start Pairing/scope freeze and provider Cancel; Discover → Connect; matching full codes and disabled approval until comparison confirmation; denial and consumer cancellation; read-only grant save in both stores and typed snapshot; saved reconnect with pairing off; both-app restart; consumer cold-launch of the provider with saved consent; revocation/protected reload and failed old-credential reconnect; consumer Forget; both-app restart empty; final mode off; strict nested bundle signature checks.
+
+Only a temporary read-only test grant was created. It was revoked/forgotten, and both apps restarted without it. No real preset was changed. The revoked credential timed out during endpoint resolution; this was not an authenticated `permissionDenied` response. Actual-app mutation/live-event, expiry, duplicate-install and failed-save scenarios were not rerun in this pass. Local Developer ID success does not qualify notarized distribution, delivered updates, renewal, unrelated teams, other platforms or independent security review.
+
+Preserved failures and recovery:
+
+- Default host builds omitted licensing product configuration even in Release. Existing authorized configuration was supplied privately with redacted build logs. Configured Apple Development builds then waited in the host licensing Keychain read before Talk UI; matching the installed Developer ID signing category resolved startup. This observation is not a universal requirement to switch signing identity.
+- A direct Developer ID build override conflicted with automatic development signing. Matching local signing/profiles and an Xcode archive/local export produced verified bundles; no SDK protection was relaxed.
+- Native UI automation briefly lost a windowless ExtraBar after restart while the process remained in its normal application event loop. The app’s settings shortcut restored access; subsequent saved reconnect, cold launch and cleanup checks passed.
+
+The standalone discoverable-pairing AppKit probe also passed actual routing and encrypted setup in all four standard/sandbox combinations. Its anonymous control-pipe code comparison does not substitute for the real-app consent and Keychain checks above.
 
 ## Native example matrix
 

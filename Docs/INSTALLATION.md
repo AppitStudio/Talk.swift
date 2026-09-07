@@ -89,6 +89,8 @@ Unsigned or ad-hoc hosts fail persistence with `credentialConfiguration`. Do not
 
 The provider embeds the canonical contract and declares `TalkContract` in Info.plist. Declare `talk-spike-provider` as the provider URL scheme and `talk-spike-consumer` as the consumer scheme. These strings are part of the current SDK routing implementation; do not rename them independently. Apps with both roles declare both.
 
-Wire incoming URLs into `EndpointResolver`, keep the provider's callback bundle allowlist explicit, and launch each signed app once at its intended installation. There is no online registration or central service. Discovery uses LaunchServices and preserves unavailable candidates; duplicate installations require resolution before reconnect.
+Route provider URLs into `DiscoverablePairingHost.receive` and saved `EndpointResolver.reply` handling; route consumer URLs into both `PairingDiscovery.receive` and `EndpointResolver.receive`. Keep the provider’s callback bundle allowlist explicit, and launch each signed app once at its intended installation. There is no online registration or central service. Discovery uses LaunchServices and preserves unavailable candidates; duplicate installations require resolution before reconnect.
+
+Add the [Start Pairing → Discover → Connect flow](DISCOVERABLE-PAIRING.md) with full-code comparison before approval. These setup URLs carry public hints; secrets and durable credentials must never enter URLs. Keep existing grant stores and reconnect handling intact.
 
 Continue with the [integration guide](INTEGRATION-GUIDE.md), [runnable examples](EXAMPLES.md), or [LLM-assisted workflow](LLM-INTEGRATION.md).

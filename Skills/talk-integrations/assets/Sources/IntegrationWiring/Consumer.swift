@@ -3,6 +3,8 @@ import IntegrationContract
 import Talk
 
 // The app must own/serialize pairing, connection and event tasks; these are primitives.
+// Discover/Connect use a retained PairingDiscovery and explicit comparison UI; see
+// references/pairing.md. Forward incoming URLs to both discovery and the resolver.
 // Reload the consumer store at startup. Close the old session before saving replacement.
 public func saveReceivedGrant(_ record: PairingRecord, expectedProviderBundleID: String,
                               store: IntegrationStore) async throws {

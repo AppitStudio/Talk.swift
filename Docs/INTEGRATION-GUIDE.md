@@ -80,7 +80,13 @@ TalkServer validates the contract/action mapping at start, checks the negotiated
 
 ## Pair and obtain scoped consent
 
-For pairing without clipboard transfer, use `DiscoverablePairingHost` and `PairingDiscovery`: [Start Pairing → Discover → Connect](DISCOVERABLE-PAIRING.md). Require comparison of the entire verification code in the provider consent UI. Existing saved records and reconnect behavior are unchanged. The native examples below retain manual invitations as an alternative.
+Use **Start Pairing → Discover → Connect** by default for new integrations. Retain `DiscoverablePairingHost` in the provider and `PairingDiscovery` in the consumer; route incoming setup URLs alongside saved endpoint requests. Freeze permissions per mode, display the full verification code in both apps, and disable provider approval until the user confirms a match. Keep the real task cancellable throughout consent and response delivery.
+
+The [discoverable-pairing guide](DISCOVERABLE-PAIRING.md) documents each API and the [portable skill workflow](../Skills/talk-integrations/references/pairing.md) maps them to app state and UI actions. Existing saved records and reconnect behavior are unchanged; adopting discovery does not require users to re-pair existing grants.
+
+### Manual invitation alternative
+
+The runnable Studio/Automator examples retain manual invitations. The following instructions apply to that alternative, not the default discovery UI.
 
 StudioModel demonstrates the full consent flow. `PairingHost.start(providerBundleID:approve:)` creates a five-minute, one-use invitation. Only its approval closure may create a durable PairingRecord after visible provider consent. The record contains a fresh `PairingCredential`, the endpoint bundle hint, and exactly the approved scopes; call `provider.approve(record)` and return the record from the closure. Keep the host alive until completion/expiry, and stop it on cancellation. PairingHost cancels its approval closure if the consumer disconnects.
 

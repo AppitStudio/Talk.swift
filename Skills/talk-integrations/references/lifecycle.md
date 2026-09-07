@@ -1,10 +1,6 @@
-## Discoverable pairing (preferred)
-
-Read the SDK’s `Docs/DISCOVERABLE-PAIRING.md` and use the `DiscoverablePairingHost` / `PairingDiscovery` APIs in beta `0.1.0-beta.1`. Pairing starts only on provider user intent, with frozen scopes. Discover and Connect are separate consumer actions. Display the full verification code in both apps and require confirmation that it matches before the provider grants scopes. Route setup URLs alongside endpoint resolution, keep hosts/tasks alive through response delivery, and cancel on shutdown. Existing records/storage services remain unchanged. The manual-invitation workflow below remains an alternative.
-
 # Provider and consumer lifecycle
 
-Use the checked-out SDK examples for complete UI/lifecycle wiring: `Examples/Studio/Sources/StudioModel.swift`, both app delegates, `Examples/Automator/Sources/AutomatorModel.swift` and `AutomatorSession.swift`. Adapt them; do not copy their bundle IDs, domain or signing configuration. The skill's starter assets are compilable integration primitives, not finished apps or an automatic consent UI.
+Default to [discoverable pairing](pairing.md) for new app integrations. The checked-out SDK examples demonstrate manual pairing and reusable lifecycle wiring: `Examples/Studio/Sources/StudioModel.swift`, both app delegates, `Examples/Automator/Sources/AutomatorModel.swift` and `AutomatorSession.swift`. Adapt them; do not copy their bundle IDs, domain or signing configuration. The skill's starter assets are compilable integration primitives, not finished apps or an automatic consent UI.
 
 ## Provider startup and handlers
 
@@ -14,7 +10,7 @@ Register each generated action ID in the handler. Decode input, validate domain 
 
 Maintain app-level session ID and monotonic revision in snapshots when events and responses can race. Snapshot reads and mutations should have a consistent actor boundary. Do not move expensive synchronous work onto the main actor just because its wrapper is async. Guard reentrant connect/pair/revoke operations with explicit state; actor isolation alone does not serialize work across awaits.
 
-## First pairing and consent
+## Manual invitations (alternative)
 
 1. The provider lets the user choose a label and scopes, freezes those values for this invitation, and creates/retains a **new** `PairingHost`. A started host cannot be reused. Call `start(providerBundleID:approve:)` and show `invitation.code()` through direct copy/secure UI. It lasts at most five minutes and is one-use. Retain it only in memory and clear presentation at expiry/cancel/consumption.
 2. The consumer parses protected input with `PairingInvitation.parse`, clears the field, and calls `PairingClient.pair(using:)`. Keep and cancel this operation when the pairing UI is cancelled. Do not print the code, raw record, or invitation error input.
@@ -29,13 +25,13 @@ Pairing is not a distributed transaction. The provider may save before consumer 
 
 ## Permission replacement and management
 
-For the selected integration, create a new invitation/consent flow with new scopes and `replacesID` equal to the selected old credential ID. Generate a fresh credential. `provider.approve` stops the old listener, persists replacement and activates the new grant; on failure the old row may remain stopped pending recovery. Pre-approval rejection preserves the old grant. Other grants stay independent.
+For the selected integration, start a fresh discoverable mode and consent flow (or a manual invitation if explicitly chosen) with new scopes and `replacesID` equal to the selected old credential ID. Generate a fresh credential. `provider.approve` stops the old listener, persists replacement and activates the new grant; on failure the old row may remain stopped pending recovery. Pre-approval rejection preserves the old grant. Other grants stay independent.
 
 The consumer closes the old session before inserting the received replacement and then rebuilds that session. Never silently edit scopes on a stored record. Choose scopes from generated **action-to-scope mapping**, not action constant spelling.
 
 Provide per-row status, scopes, connect/disconnect, provider revoke, and consumer forget controls. `provider.revoke(id)` removes the endpoint and cancels active sessions before durable removal; on persistence failure show `.revocationPending`, not durable success. Consumer forget closes the session and removes only its local record. It cannot prove provider revocation.
 
-## Discovery and actual automation
+## Saved endpoint discovery and actual automation
 
 Use one retained `EndpointResolver` and forward consumer URLs to it. Resolve one installation and a fresh port for each new transport (see the starter's `connectSaved`). Pass provider URLs to `EndpointResolver.reply` with live endpoints and the consumer allowlist. Queue a bounded number while restoration is in progress. Do not use display metadata as trust.
 
@@ -45,7 +41,7 @@ Wire the user's actual automation trigger to the generated method. Prevent overl
 
 For live events, subscribe for the initial snapshot, then iterate `transport.events` and decode through the generated client's `decodeEvent`. The owner stores one event task per session. Apply matching-session revisions monotonically; accept a new provider session only from the current connection. Use a generation token or equivalent to reject callbacks from replaced connections. Treat normal stream completion as disconnection too.
 
-Cancel event/operation tasks and close transports on disconnect, replacement and teardown. Cancel in-flight connection work so it cannot later resurrect a closed session. Retain cancellation handles for unstructured tasks; a view disappearing must not destroy an app-level provider used by other scenes. Explicit app shutdown uses `provider.stop()` and `PairingHost.stop()` where the lifecycle permits asynchronous cleanup; process exit alone is not a test of graceful shutdown.
+Cancel event/operation tasks and close transports on disconnect, replacement and teardown. Cancel in-flight connection work so it cannot later resurrect a closed session. Retain cancellation handles for unstructured tasks; a view disappearing must not destroy an app-level provider used by other scenes. Explicit app shutdown uses `provider.stop()` and the active pairing host’s `stop()` where the lifecycle permits asynchronous cleanup; process exit alone is not a test of graceful shutdown.
 
 ## Recovery
 

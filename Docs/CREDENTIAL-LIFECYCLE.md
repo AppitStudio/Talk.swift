@@ -4,6 +4,8 @@ Talk uses only `CredentialStore`, backed by the macOS data-protection Keychain. 
 
 New items are nonsynchronizing and use `kSecAttrAccessibleWhenUnlockedThisDeviceOnly`. Per-query authentication UI is disabled. Routine saved-grant reconnect requires no biometric/Talk approval, while locked or inaccessible storage fails visibly. The SDK does not alter process-wide Keychain interaction settings.
 
+Discoverable pairing changes setup UI and key agreement, not the saved-grant format. Upgrading from manual invitations preserves existing records and reconnect behavior when app identifiers, storage services and access groups stay unchanged. Pairing mode is required only for a new exchange or permission replacement. See [discoverable pairing](DISCOVERABLE-PAIRING.md).
+
 ## Archive and mutations
 
 A single version 2 archive holds up to 16 independently keyed integration records. One `IntegrationStore` actor must own each service in the host; do not race separate whole-archive writers. Duplicate IDs, malformed records, unknown archive versions, obsolete single-record data and oversized archives are rejected. There is no compatibility migration or search for old items.

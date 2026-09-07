@@ -26,7 +26,7 @@ Use synthetic app data and separate test grants. Exercise only the configuration
 | Scenario | Observable pass condition |
 | --- | --- |
 | Registration and cold launch | Final installed provider appears with available manifest; consumer resolves one copy and cold-launches it to a successful TLS/typed call. |
-| Explicit consent | One-use invitation reaches visible scope approval; deny/cancel/expiry do not create grants before approval. No code/credential appears in logs. |
+| Explicit consent | Start Pairing → Discover → Connect reaches visible scope approval with matching full codes and an unchecked comparison gate; deny/cancel/expiry do not create grants before approval. For manual pairing, transfer the one-use invitation through protected input. No code/credential appears in logs. |
 | Allowed real trigger | User's actual trigger invokes the intended provider action and the expected app state changes once. Capture synthetic before/after state. |
 | Least privilege | A read-only grant reads; a forbidden mutation/subscription returns `permissionDenied` and the provider state remains unchanged. Exercise the call path, not only disabled UI. |
 | Saved consent | Repeated permitted actions and manual reconnect work without new permission prompts. Quit/reopen each app, then both, and repeat with the same saved grant. |
@@ -63,4 +63,6 @@ Classify unavailable fault injection as NOT RUN or BLOCKED, not a pass. Sleep/wa
 
 For each relevant scenario record `PASS`, `FAIL`, `BLOCKED`, or `NOT RUN`, plus the build/configuration, steps, observed result and redacted local evidence location. Keep the exact failure if a later run passes. Summarize which user trigger works, which scopes were exercised, whether persistence/revocation were proved, and what remains unverified. A bundle preflight PASS with runtime NOT RUN is an incomplete integration validation.
 
-For discoverable pairing, also verify: no discovery/key exchange outside pairing mode; matching full codes; approval disabled until comparison; denial and Cancel on either side dismiss consent; expiry/one-attempt use; restart requires a fresh mode; duplicates rejected; saved grants reconnect with pairing mode off. No private keys, setup secrets or durable credentials may appear in URLs, logs or the clipboard.
+For the default [discoverable pairing flow](pairing.md), also verify: no discovery/key exchange outside pairing mode; matching full codes; approval disabled until comparison; denial and Cancel on either side dismiss consent; expiry/one-attempt use; restart requires a fresh mode; duplicates rejected; saved grants reconnect with pairing mode off. No private keys, setup secrets or durable credentials may appear in URLs, logs or the clipboard.
+
+If native UI automation loses a window after restart, distinguish a windowless app from a blocked process before attributing failure to Talk. Use the app’s normal settings/reopen route and fresh UI observations. Record the initial failure and the later successful scenario separately; do not treat launch alone as persistence or reconnect evidence.

@@ -6,7 +6,7 @@ Set `TALK_SDK_ROOT` to the actual checkout in the invoking shell. Check its `Pac
 
 For Xcode, add `https://github.com/AppitStudio/Talk.swift.git` at exact beta version `0.1.0-beta.1` or a reviewed commit, or use the SDK directory as a local package. Link `Talk` to each participating app. Add a shared contract library to both apps. Preserve existing configurations and entitlements. The SDK's `StudioContract` is demo-specific; real integrations get their own contract.
 
-The SDK's `Docs/INSTALLATION.md` contains a complete remote SwiftPM manifest using `package: "talk.swift"`. Match the SDK source and skill revisions; do not assume a released version exists.
+The SDK's `Docs/INSTALLATION.md` contains a complete remote SwiftPM manifest using `package: "talk.swift"`. The published discoverable-pairing prerelease is `0.1.0-beta.1`. Keep the skill compatible with the resolved SDK API; documentation on main may include later corrections without changing the SDK tag.
 
 For a local SwiftPM dependency, [the starter Package.swift](../assets/Package.swift) demonstrates the explicit local dependency alias `TalkSDK`, a shared target depending on `Talk`, and `TalkClientPlugin`. Adapt the dependency path to the host layout. Keep `Contract.talk.json` at the contract target root and exclude it from ordinary sources. A tiny ordinary Swift file ensures SwiftPM recognizes a source target before plugin generation. Do not hand-define DTOs also emitted by the generator.
 
@@ -28,6 +28,10 @@ Preserve bundle ID, app-specific group and Keychain service across updates. Stor
 
 Use existing authorized local signing. Developer ID, App Store, unrelated teams and certificate renewal are separate qualification lanes; development checks do not qualify them.
 
+For an installed app, inspect its existing signing lane and normal startup requirements before replacing it for runtime tests. A successful Release build can still lack host-specific licensing/product configuration. Reuse only authorized configuration through private excluded files and redact logs; do not change licensing or Keychain policy to pass a Talk test. If startup blocks before Talk, diagnose that layer separately. A development certificate is not an interchangeable substitute for the installed signing lane; use a matching authorized certificate and profile, then verify the final nested bundle signatures and entitlements. Retain a recoverable original installation until the update runs correctly.
+
+When two app workspaces are open, a shared local package override can produce “Missing package product” in the second workspace. Prefer consistent remote pins in both apps and their contract packages; use a temporary local override in one workspace when developing the SDK. Do not silently rewrite the user’s chosen dependency setup.
+
 ## Provider metadata
 
 Merge into Info.plist, preserving other URL types:
@@ -47,7 +51,7 @@ Export JSON to `Contents/Resources/Contract.talk.json` before final signing. Dis
 
 Declare `talk-spike-consumer` in the consumer's `CFBundleURLTypes`. An app with both roles declares both schemes. These **scheme strings are currently hardcoded** in `EndpointResolver`/`ProviderDiscovery`: customize bundle/contract IDs, but do not rename schemes without a coordinated SDK change.
 
-Route incoming URLs through the existing delegate/SwiftUI lifecycle, preserving other handlers. Consumer URLs go to a long-lived `EndpointResolver.receive(_:)`. Provider URLs go to `EndpointResolver.reply(...)` using current `TalkProvider.endpoints()` and an explicit supported-consumer bundle allowlist. This allowlist is routing policy, not publisher verification.
+Route incoming URLs through the existing delegate/SwiftUI lifecycle, preserving other handlers. Consumer URLs go to both a long-lived `PairingDiscovery.receive(_:)` and `EndpointResolver.receive(_:)`. Provider URLs go to `DiscoverablePairingHost.receive(_:)` and `EndpointResolver.reply(...)` using current `TalkProvider.endpoints()` and an explicit supported-consumer bundle allowlist. This allowlist is routing policy, not publisher verification.
 
 Launch each finished app once at its intended local installation to register it with LaunchServices, then inspect `ProviderDiscovery.installed()`. Preserve unavailable candidates for diagnosis. No daemon or cloud service is needed.
 

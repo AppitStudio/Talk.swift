@@ -1,6 +1,6 @@
-# Beta readiness — 6 September 2026
+# Beta readiness — 7 September 2026
 
-**Status: public development preview, not a stable release.** The native example matrix and expanded Apple Development storage checks passed on the tested Mac. Real-app integration, unrelated-team/distribution/certificate-change qualification, independent review, and broader platform testing remain incomplete. Source publication does not mark those gates complete. See [current qualification](QUALIFICATION.md) for the measured scope and preserved inconclusive results.
+**Status: public development preview, not a stable release.** The native example matrix and expanded Apple Development storage checks passed on the tested Mac. Targeted discoverable pairing in locally Developer ID-signed DockFlow and ExtraBar also passed. Broader real-app coverage, unrelated-team/distribution/certificate-change qualification, independent review, and platform testing remain incomplete. Source publication does not mark those gates complete. See [current qualification](QUALIFICATION.md) for the measured scope and preserved inconclusive results.
 
 ## macOS 12.4 deployment
 
@@ -24,7 +24,7 @@ Host: macOS 15.7.9, Apple silicon, Swift 6.2.3 / Xcode 26.2.
 
 | Check | Result and scope |
 | --- | --- |
-| Complete current Swift Testing suite | 65 tests / 20 suites passed; two existing opt-in workloads skipped. |
+| Complete current Swift Testing suite | 75 tests / 21 suites passed for `0.1.0-beta.1`; two existing opt-in workloads skipped. |
 | Production unprovisioned hosts | Six checks passed: load/save/delete fail with `credentialConfiguration`, standard and sandboxed, actual ad-hoc processes. |
 | Production group selection | Regression tests reject missing/wildcard/mismatched identifiers and select the app group even when a shared group is first. |
 | Release compilation | Full arm64 and x86_64 builds passed; all 14 executable products declare macOS 12.4 in their Mach-O load commands. |
@@ -33,7 +33,9 @@ Host: macOS 15.7.9, Apple silicon, Swift 6.2.3 / Xcode 26.2.
 | Native examples | Before the macOS 12.4 scene update, all four standard/sandbox combinations passed pairing, calls/events, reconnect, restart/cold launch and durable revocation. Additional native denial/read-only/replacement checks passed. All four apps restarted empty after protected reload/cleanup. |
 | Apple Development production matrix | 98 checks passed again with macOS 12.4-targeted probes on the current host, following the earlier two fresh-ID passes. Adds unrestricted copied-ID attacks and actual stored attribute checks to restart/update continuity, raw denial, independent storage and owning cleanup. |
 | Sandboxed copied-ID/identity reuse | Inconclusive pre-main OS initialization stalls retained; fresh-ID successful matrix does not clear this availability case. |
-| Developer ID / App Store / certificate renewal | Unverified. |
+| Discoverable AppKit setup matrix | Four standard/sandbox combinations passed actual URL routing, matching codes, encrypted approval, denial/cancel and mode-off rejection; no Keychain/UI qualification from these probes. |
+| Local Developer ID real-app pairing | DockFlow/ExtraBar passed 21 targeted native checks, including visible code/consent, read-only persistence, reconnect/restart, cold provider launch and revocation/cleanup. See [scope](QUALIFICATION.md#discoverable-pairing-in-real-apps--7-september-2026). |
+| Delivered updates / App Store / certificate renewal | Unverified; local Developer ID installs do not qualify notarized delivery or update continuity. |
 | Unrelated real Team ID | Unverified; available matching profiles belong to one team. |
 | Other Macs and OS versions | Unverified for this candidate. Previous Rosetta runs do not qualify native Intel. |
 | Independent security review | Required; not performed by this implementation pass. |

@@ -11,7 +11,7 @@ Talk remains beta. Validate the complete flow in your actual signed apps and use
 
 ## Provider wiring
 
-Retain a `DiscoverablePairingHost` in a main-actor app service. Only the user's Start Pairing action calls `start(providerBundleID:allowedCallbackBundleIDs:lifetime:approve:)`. The default maximum lifetime is 300 seconds. Freeze the chosen scopes, label and optional replacement ID for that mode.
+Retain a `DiscoverablePairingHost` in a main-actor app service. Only the user's Start Pairing action calls `start(providerBundleID:allowedCallbackBundleIDs:lifetime:approve:)`. The default lifetime is 300 seconds, which is also the maximum. Freeze the chosen scopes, label and optional replacement ID for that mode.
 
 The approval closure receives a `DiscoverablePairingHost.Request` with an untrusted `consumerBundleID` routing label and a `verificationCode`. Present that code in the provider's visible consent UI. Disable approval until the user explicitly confirms it matches the consumer. On approval, check task cancellation and the current mode generation, create a fresh `PairingCredential` and `PairingRecord` with exactly the frozen scopes, call `TalkProvider.approve`, and return that record. Denial throws `TalkError.permissionDenied`.
 
@@ -28,6 +28,12 @@ For Discover, select an application URL using your explicit installation policy 
 For the user's Connect action, pass that candidate to `connect(to:callbackBundleID:verification:)`. Its verification callback provides the comparison code before the key-exchange request is sent. Keep it visible until consent completes or pairing is cancelled. Own and cancel the actual connection task, including forwarding parent cancellation if you wrap it in another task. A second simultaneous Connect on one discovery instance fails with `busy`.
 
 Validate the returned record's provider hint, scopes and required permissions before saving it with the consumer's store. Close any old transport when replacing a grant. Keep current storage services, access groups, bundle IDs and scopes across this upgrade: existing records and reconnect APIs are unchanged.
+
+## Integrating into an existing app pair
+
+Use the [portable skill’s pairing workflow](../Skills/talk-integrations/references/pairing.md) for concrete state, URL, consent and cancellation wiring. Replace the manual invitation field/copy controls with Start Pairing, Discover, Connect and comparison UI; keep saved credentials, storage services and ordinary reconnect unchanged. Existing grants do not need to be exchanged again. Permission changes still require fresh visible consent and a new credential replacing the selected grant.
+
+Signing and host startup remain prerequisites. Verify normal licensed startup, the signed application identifier/access group and matching provisioning before testing pairing. Reuse only authorized private build configuration; a Release build alone does not guarantee it contains the host’s required configuration. Diagnose a startup or storage failure at that layer without weakening protection.
 
 ## Protocol and trust boundary
 
@@ -46,3 +52,9 @@ Pairing is not a distributed transaction: the provider may save before a consume
 `swift test` covers public hint validation, key/transcript binding, explicit mode gating, consent allow/deny, cancellation from each side, stale/expired modes, one-attempt use, and callback restrictions using actual loopback TLS with injected URL delivery.
 
 `/usr/bin/python3 Scripts/validate-discoverable-pairing.py` builds disposable AppKit processes and runs real LaunchServices routing and encrypted pairing in all four standard/sandbox combinations. Verification codes pass only through anonymous test-control pipes; evidence stores match results, never codes or credentials. This does not test Keychain persistence, UI consent, or a production app's lifecycle. Validate those separately in the signed apps. The SDK's native Studio/Automator examples continue demonstrating manual invitation pairing, which remains available.
+
+### Actual app validation
+
+DockFlow and ExtraBar completed 21 targeted native checks on macOS 15.7.9 arm64 with locally Developer ID-signed builds: mode-off discovery rejection, explicit mode/scope freeze, full-code comparison and approval gating, denial/cancellation, a read-only saved grant and typed snapshot, saved reconnect, both-app restart, cold provider launch, revocation and cleanup. Both apps restarted with the test grant removed and pairing mode off. See [qualification](QUALIFICATION.md#discoverable-pairing-in-real-apps--7-september-2026) for the scope and preserved failures.
+
+This pass did not exercise real preset mutations/live events, actual-app expiry/duplicate/fault injection, notarized delivery, certificate renewal, unrelated teams or other OS/hardware. Keep those distinct from the successful pairing checks.
