@@ -6,7 +6,7 @@
   "formatVersion": 1,
   "app": "dockflow",
   "displayName": "DockFlow",
-  "guideVersion": "1.0.0",
+  "guideVersion": "1.0.1",
   "updated": "2026-09-07",
   "status": "beta",
   "roles": [
@@ -143,4 +143,4 @@ The provider owns the wire schema and action semantics. Consumers pin a reviewed
 
 Run `TalkContractChecker` with the old consumer contract first and the new provider export second. Update schema, metadata, guide semantics and recipe in the same reviewed change, then regenerate and recompile. Increment `guideVersion` for guide/recipe changes; increment `contractVersion` only for actual API changes. These are independent of Talk SDK and DockFlow app versions.
 
-For SDK/public guide issues use the [Talk repository](https://github.com/AppitStudio/Talk.swift). Use private vulnerability reporting for security concerns. Follow [contributing](../../CONTRIBUTING.md) and [security guidance](../../SECURITY.md); include synthetic reproduction steps, versions and stable errors, never a pairing record or user preset dump. Public availability does not itself grant a license; respect the repository's current licensing statement.
+For SDK/public guide issues use the [Talk repository](https://github.com/AppitStudio/Talk.swift). Use private vulnerability reporting for security concerns. Follow [contributing](../../CONTRIBUTING.md) and [security guidance](../../SECURITY.md); include synthetic reproduction steps, versions and stable errors, never a pairing record or user preset dump. This public guide, contract package and example are covered by the repository's [MIT License](../../LICENSE). DockFlow's separate application license is unchanged.

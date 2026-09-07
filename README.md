@@ -136,4 +136,4 @@ Read [contributing](CONTRIBUTING.md) for validation and preview compatibility ex
 
 ## License
 
-The [integration skill](Skills/talk-integrations/LICENSE) and [npm installer](Npm/LICENSE) are MIT licensed, including the skill’s starter assets. The Talk.swift SDK itself has no license grant yet; SDK license selection remains pending.
+Talk.swift is licensed under the [MIT License](LICENSE), including the SDK, tools, examples, documentation, integration guides, skill, installer, and first-party website source. Third-party components retain their own licenses; see the [website notices](Website/README.md#third-party-assets).

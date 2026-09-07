@@ -43,4 +43,4 @@ Talk is beta software. A successful build does not establish production readines
 
 ## License
 
-This npm package, including the skill, starter assets and installer, is MIT licensed. The Talk.swift SDK is distributed separately and its license remains pending; this package does not grant a license to the SDK.
+This npm package, including the skill, starter assets and installer, is MIT licensed. The separately distributed Talk.swift SDK is also covered by the repository's [MIT License](https://github.com/AppitStudio/Talk.swift/blob/main/LICENSE).

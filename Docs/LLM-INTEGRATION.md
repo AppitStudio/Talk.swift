@@ -30,7 +30,7 @@ npx talk-integrations@latest install --dir path/to/agent/skills
 
 Global installation uses `~/.agents/skills` and `~/.claude/skills`. Existing directories and symlinks are never overwritten. To update, move your previous `talk-integrations` folder aside, rerun the command, and reapply any customizations. Remove the installed folder to uninstall. If migrating a previous Codex copy in `~/.codex/skills`, move it aside to avoid duplicate discovery.
 
-The [npm package](https://www.npmjs.com/package/talk-integrations) is MIT licensed and contains the skill, starter assets and installer. Its version is independent from the SDK. It does not install or license the SDK; provide the agent with your SDK checkout or resolved package source. The current skill targets SDK `0.1.0-beta.2`.
+The [npm package](https://www.npmjs.com/package/talk-integrations) is MIT licensed and contains the skill, starter assets and installer. Its version is independent from the SDK. It does not install the SDK; provide the agent with your SDK checkout or resolved package source. The SDK is also covered by the repository's [MIT License](../LICENSE). The current skill targets SDK `0.1.0-beta.2`.
 
 The paths above follow the [Codex skill documentation](https://developers.openai.com/codex/skills/) and [Claude Code skill documentation](https://code.claude.com/docs/en/skills).
 

@@ -27,7 +27,7 @@ Deploy the contents of `dist/` to a static host. Asset paths are relative so the
 - The package example targets `0.1.0-beta.2`, which includes generic incoming-connection support and public app guides. The website is a local preview; publishing the SDK source does not deploy this site.
 - Links to `Integrations/`, `Docs/INTEGRATION-UX.md`, installation, pairing, examples, security, and the skill target the GitHub repository. Verify the matching beta.2 source/docs are available there before deploying the website.
 - The ExtraBar/DockFlow illustration shows a read-only preset request. It does not invoke either app or represent a live connected session.
-- Preserve beta status, the pending minimum-OS qualification, correct signing requirements, and the pending license statement until their underlying status changes.
+- Preserve beta status, the pending minimum-OS qualification, and correct signing requirements until their underlying status changes. Keep the footer linked to the repository's [MIT License](../LICENSE).
 - No analytics, external font requests, accounts, cloud data, or runtime LLM are used.
 
 ## Design and motion
@@ -51,4 +51,4 @@ The website's dependencies are separate from the dependency-free Swift SDK:
 - Manrope from `@fontsource-variable/manrope` 5.3.0: SIL Open Font License 1.1. The self-hosted Latin variable font is bundled by Vite; its license is included in [public/manrope-license.txt](public/manrope-license.txt).
 - Vite 7.3.6: development/build tooling, MIT license.
 
-These third-party terms do not grant a license to Talk.swift itself.
+First-party Talk.swift website source is covered by the repository's [MIT License](../LICENSE). The third-party components above retain their own licenses and notices.
