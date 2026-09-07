@@ -10,6 +10,18 @@ Built for macOS developers adding integrations to their apps, and for coding age
 
 The declared runtime minimum is **macOS 12.4**; actual Monterey runtime validation is pending. Current native validation covers macOS 15.7.9 on Apple silicon: Apple Development examples/storage probes and a locally Developer ID-signed DockFlow/ExtraBar pairing flow. Delivered-update/distribution qualification, unrelated developer teams, additional platforms, and independent security review remain open. See [status and qualification](Docs/BETA-READINESS.md).
 
+## Integrate with your coding agent
+
+Install the Talk integration skill from your app project's root, then let **Claude Code**, **Codex**, or another coding agent help wire up the SDK:
+
+```sh
+npx talk-integrations@latest install
+```
+
+Requires Node.js 20+. Installs for Claude Code and Codex in the current project. Start a new agent session and use `/talk-integrations` in Claude Code or `$talk-integrations` in Codex, followed by the integration you want to build. For example: “Add a Talk integration so my focus app can select scenes in my workspace app.”
+
+The skill guides package setup, typed contracts, pairing UI, saved permissions and signed-app validation. Use `--agent claude` or `--agent codex` for one agent, or `--global` for all your projects. See [installation, updates and other agents](Docs/LLM-INTEGRATION.md) and the [public npm package](https://www.npmjs.com/package/talk-integrations). The Swift SDK is installed separately through Xcode or SwiftPM.
+
 ## What you get
 
 - **Typed contracts:** declare actions, scopes, DTOs, and events in JSON; generate Swift clients with the included SwiftPM plugin.
@@ -124,4 +136,4 @@ Read [contributing](CONTRIBUTING.md) for validation and preview compatibility ex
 
 ## License
 
-A license has not been selected yet. This public beta currently has no license grant; license selection is pending.
+The [integration skill](Skills/talk-integrations/LICENSE) and [npm installer](Npm/LICENSE) are MIT licensed, including the skill’s starter assets. The Talk.swift SDK itself has no license grant yet; SDK license selection remains pending.

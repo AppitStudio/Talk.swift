@@ -1,0 +1,17 @@
+{
+  "name": "talk-integrations",
+  "version": "0.1.0",
+  "description": "Install the Talk.swift SDK integration skill for Claude Code, Codex, and other coding agents.",
+  "type": "module",
+  "bin": { "talk-integrations": "bin/cli.mjs" },
+  "files": ["bin/cli.mjs", "skill/", "LICENSE", "README.md"],
+  "engines": { "node": ">=20" },
+  "license": "MIT",
+  "author": "Appit Studio",
+  "repository": { "type": "git", "url": "git+https://github.com/AppitStudio/Talk.swift.git", "directory": "Npm" },
+  "homepage": "https://github.com/AppitStudio/Talk.swift#integrate-with-your-coding-agent",
+  "bugs": { "url": "https://github.com/AppitStudio/Talk.swift/issues" },
+  "keywords": ["agent-skill", "skills", "claude-code", "codex", "swift", "macos", "talk-sdk"],
+  "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" },
+  "scripts": { "pack:release": "node scripts/pack.mjs" }
+}

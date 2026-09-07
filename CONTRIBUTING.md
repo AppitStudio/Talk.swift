@@ -19,6 +19,8 @@ These commands do not create or install signing identities. Persistent example-a
 
 ## Changes and validation
 
+For the npm skill installer, run `npm run pack:release --prefix Npm` with Node.js 20+. It copies the canonical `Skills/talk-integrations` resources into an isolated package, runs installer tests, checks the exact packed file list, and prints the tarball path under ignored `LocalBuild/NpmPublication`. Review and publish that tarball with `npm publish <tarball-path> --access public`; do not publish the `Npm` source directory directly. Bump `Npm/package.json` for later releases. The skill package version is independent from the Swift SDK version; its MIT license covers the skill and installer only.
+
 Explain the concrete problem, resulting behavior, and checks performed in each pull request. Test behavior that changes, including a negative control for security boundaries. Preserve TLS pinning, explicit scoped consent, bounded resources, cancellation, and the rule against automatic mutation retries. Do not add a storage fallback or widen Keychain access to make a test pass.
 
 Keep schema, protocol, and package versions distinct. Changes to wire IDs, scopes, DTO shapes, or mutation semantics need compatibility review. Preview APIs can change; no stable-release compatibility or support window is promised yet.

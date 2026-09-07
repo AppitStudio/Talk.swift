@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--stage', action='store_true', help='Create a source-only local review copy')
 parser.add_argument('--check-index', action='store_true', help='Require the Git index to match audited working files exactly')
 args = parser.parse_args()
-folders = ['Sources', 'Tests', 'Examples', 'Plugins', 'Scripts', 'Skills', 'Integrations']
+folders = ['Sources', 'Tests', 'Examples', 'Plugins', 'Scripts', 'Skills', 'Integrations', 'Npm']
 root_files = ['Package.swift', 'README.md', 'SECURITY.md', 'CONTRIBUTING.md', '.gitignore', '.gitattributes']
 website_files = [
     'Website/.gitignore', 'Website/README.md', 'Website/index.html',
@@ -36,7 +36,7 @@ doc_files = [
 ]
 if (root / 'LICENSE').exists():
     root_files.append('LICENSE')
-suffixes = {'.swift', '.c', '.h', '.py', '.sh', '.md', '.json', '.txt', '.yaml'}
+suffixes = {'.swift', '.c', '.h', '.py', '.sh', '.md', '.json', '.txt', '.yaml', '.mjs'}
 patterns = {
     'host-path': re.compile(r'/(?:Users|home|Volumes)/[A-Za-z0-9_.-]+/'),
     'private-key': re.compile(r'-----BEGIN (?:RSA |EC |OPENSSH |ENCRYPTED )?PRIVATE KEY-----'),
@@ -68,7 +68,7 @@ for folder in folders:
         if p.is_symlink():
             issue(p, 'symlink')
         elif p.is_file():
-            if p.suffix not in suffixes or '.private.' in p.name:
+            if (p.suffix not in suffixes and p.relative_to(root).as_posix() not in {'Npm/LICENSE', 'Skills/talk-integrations/LICENSE'}) or '.private.' in p.name:
                 issue(p, 'unapproved-file-type')
             elif p.suffix == '.yaml' and p.relative_to(root).as_posix() != 'Skills/talk-integrations/agents/openai.yaml':
                 issue(p, 'unapproved-yaml')

@@ -6,7 +6,35 @@ Talk is beta software and still needs more testing and validation. Use it with c
 
 The skill lives at [`Skills/talk-integrations`](../Skills/talk-integrations). Install the **whole directory**: `SKILL.md` links to references, compilable starter assets, and a read-only bundle validation script.
 
-## Install in Codex
+## Install with npm
+
+From your app project's root, run:
+
+```sh
+npx talk-integrations@latest install
+```
+
+Requires Node.js 20+. This installs the whole skill for **Codex** in `.agents/skills/talk-integrations` and **Claude Code** in `.claude/skills/talk-integrations`. Start a new session and invoke `$talk-integrations` in Codex or `/talk-integrations` in Claude Code.
+
+```sh
+# One agent only
+npx talk-integrations@latest install --agent codex
+npx talk-integrations@latest install --agent claude
+
+# Both agents, across all your projects
+npx talk-integrations@latest install --global
+
+# Another agent's skills directory
+npx talk-integrations@latest install --dir path/to/agent/skills
+```
+
+Global installation uses `~/.agents/skills` and `~/.claude/skills`. Existing directories and symlinks are never overwritten. To update, move your previous `talk-integrations` folder aside, rerun the command, and reapply any customizations. Remove the installed folder to uninstall. If migrating a previous Codex copy in `~/.codex/skills`, move it aside to avoid duplicate discovery.
+
+The [npm package](https://www.npmjs.com/package/talk-integrations) is MIT licensed and contains the skill, starter assets and installer. Its version is independent from the SDK. It does not install or license the SDK; provide the agent with your SDK checkout or resolved package source. The current skill targets SDK `0.1.0-beta.2`.
+
+The paths above follow the [Codex skill documentation](https://developers.openai.com/codex/skills/) and [Claude Code skill documentation](https://code.claude.com/docs/en/skills).
+
+## Install manually from source
 
 Clone the SDK into a persistent development directory:
 
@@ -15,10 +43,10 @@ git clone https://github.com/AppitStudio/Talk.swift.git
 cd Talk.swift
 ```
 
-From that checkout, copy the skill into your Codex skills directory. This command refuses to overwrite an existing installation:
+From that checkout, copy the skill into your personal Codex skills directory. This command refuses to overwrite an existing installation:
 
 ```sh
-talk_skill_parent="${CODEX_HOME:-$HOME/.codex}/skills"
+talk_skill_parent="$HOME/.agents/skills"
 talk_skill_target="$talk_skill_parent/talk-integrations"
 mkdir -p "$talk_skill_parent"
 if [ -e "$talk_skill_target" ] || [ -L "$talk_skill_target" ]; then
