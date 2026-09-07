@@ -1,6 +1,6 @@
 {
   "name": "talk-integrations",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Install the Talk.swift SDK integration skill for Claude Code, Codex, and other coding agents.",
   "type": "module",
   "bin": { "talk-integrations": "bin/cli.mjs" },

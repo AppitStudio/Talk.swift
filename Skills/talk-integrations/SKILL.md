@@ -1,6 +1,6 @@
 ---
 name: talk-integrations
-description: Add or audit Talk.swift integrations in macOS apps that expose or consume typed actions, including pairing, scoped consent, calls, events, and signed-app validation. Also author public integration guides for apps that supply a Talk contract.
+description: Add or audit Talk.swift integrations in macOS apps, including requests to use the Talk integration skill with a named app such as DockFlow. Find the provider's real integration guide and contract before implementing typed calls, pairing, scoped consent, events, and signed-app validation. Also author public guides for apps that supply a Talk contract.
 ---
 
 # Talk SDK integrations
@@ -10,6 +10,8 @@ Implement the requested provider, consumer, or both in the user's existing macOS
 Talk is beta software and still needs more testing and validation. State this in the integration handoff, recommend cautious evaluation with synthetic or noncritical data, and do not claim production readiness from a successful build or static preflight.
 
 ## Establish the integration
+
+For a request such as “add integration with dockflow using talk integration skill — the integration will be like …”, treat the named app as the intended provider unless the user specifies another role. First follow [provider lookup and contract requirements](references/guides.md#find-the-requested-provider) against the canonical [public integration directory](https://github.com/AppitStudio/Talk.swift/tree/main/Integrations). Search spelling variations and similar names, then confirm candidates against directory/guide metadata. If multiple apps match or the intended app is uncertain—even with one plausible match—ask the user to select/confirm the correct app or contract before proceeding. Do not silently choose the closest name. For an unambiguous match, read the public guide and linked contract without asking the user to supply them, then map the requested behavior to supported actions. If no usable contract is found, explicitly ask for the provider's contract source or official guide and pause provider-specific implementation. Never invent an API, use the synthetic starter as that app's contract, or claim an integration exists without it. Continue independent host inspection/setup while waiting.
 
 Inspect the host's instructions, project/package configuration, app lifecycle, signing and sandbox settings, and existing integration code. Locate the user's Talk SDK checkout or resolved package source; refer to it as `TALK_SDK_ROOT` in commands. Do not assume this skill is installed inside the SDK. If needed, request its local location while inspecting the host.
 

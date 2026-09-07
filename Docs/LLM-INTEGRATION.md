@@ -80,6 +80,8 @@ permission replacement, and revocation.
 
 For consumer-only work, supply the provider's actual contract. The agent should not invent action IDs or infer permissions from discovery metadata. For provider-only work, describe the capabilities, scope boundaries, and side effects you want exposed.
 
+You can also name the provider directly: “Add integration with dock flow using the Talk integration skill; let my app apply an existing DockFlow preset when a focus session starts.” The skill first searches the [public integration directory](https://github.com/AppitStudio/Talk.swift/tree/main/Integrations), resolves the app's guide and real contract, and checks that the requested feature is supported. It considers case/spacing differences, typos and similar names, then checks guide metadata. Multiple candidates or any uncertainty—even one plausible match—require the user to confirm the correct app or contract before proceeding; it must not silently pick the closest name. If the contract is missing, unavailable or inconsistent, it asks for the provider's exported contract or official guide and pauses provider-specific implementation. Unsupported features require a real provider API update or an agreed supported alternative; the skill must not invent actions or replace them with mocks.
+
 When the provider's source is private, supply its [public app guide](../Integrations/README.md). The DockFlow guide ships the schema and a generated-contract package needed by an external consumer. The guide's availability and version requirements are separate from the SDK's declared minimum.
 
 ```text
