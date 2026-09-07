@@ -1,8 +1,8 @@
 # Publish an app's public integration guide
 
-A developer should be able to implement your app's Talk features from a public guide and exported schema, without your app's source. Keep one maintained guide per app under `Integrations/<app>/GUIDE.md`. Use the single [canonical template](../Integrations/TEMPLATE.md) whether the app provides actions, consumes actions, or does both.
+A developer should be able to implement your app's Talk features from a public guide and exported schema, without your app's source. Keep one maintained guide per app that supplies a public contract under `Integrations/<app>/GUIDE.md`. Use the single [canonical template](../Integrations/TEMPLATE.md) for provider apps, including apps that also consume other providers. Consumers read the provider’s guide; using the SDK alone does not require their own registry entry.
 
-The guide format, app/API version, SDK version and schema format version are independent. Format 1 uses a recognizable HTML marker followed by a JSON metadata block and fixed sections. JSON avoids a YAML parser dependency. The metadata declares roles, the SDK baseline, provider contract identity/version/hash/module, and a closed list of consumed provider guides. The contract hash detects drift; it does not verify publisher identity.
+The guide format, app/API version, SDK version and schema format version are independent. Format 1 uses a recognizable HTML marker followed by a JSON metadata block and fixed sections. JSON avoids a YAML parser dependency. The metadata requires the provider role, SDK baseline and a non-null provider contract with its identity/version/hash/module. An app that also consumes other providers can additionally declare the consumer role and list those provider guides. The contract hash detects drift; it does not verify publisher identity.
 
 ## Create the draft
 
@@ -26,15 +26,9 @@ python3 Scripts/integration-guides.py init sample-studio \
 
 The command validates and canonicalizes JSON through `TalkSchemaExporter`, creates `Contract/Package.swift` with `TalkClientPlugin`, and fills identity, hash and action/scope rows in the one template. It never overwrites an existing guide. The sample's schema is synthetic; for your own app pass the real exported contract. A provider cannot be scaffolded from a marketing description or an inferred private Swift method.
 
-For a consumer-only app:
+For an app that supplies its own public contract and also calls DockFlow, use `--roles provider,consumer` with its provider arguments and `--consumes Integrations/dockflow/GUIDE.md`. Repeat `--consumes` for each provider the app actually integrates with. `--module` optionally selects the Swift contract module name. The default role is `provider`; `--contract`, `--bundle-id` and `--tools-dir` are always required.
 
-```sh
-python3 Scripts/integration-guides.py init sample-launcher \
-  --name "Sample Launcher" --roles consumer \
-  --consumes Integrations/dockflow/GUIDE.md
-```
-
-Use `--roles provider,consumer` with both sets of inputs for a dual-role app. Repeat `--consumes` for each provider the app actually integrates with. `--module` optionally selects the Swift contract module name. Consumer-only guides must use `provider: null`; never synthesize a fake inbound API to complete a template.
+A consumer-only app does not create a guide in this directory. Its developer reads the existing provider guide and implements a feature against that public contract. ExtraBar, for example, uses the DockFlow guide without needing its own entry. Do not invent a provider contract merely to add an app to the catalog.
 
 ## Fill the contract's meaning
 
@@ -46,7 +40,7 @@ A useful request is:
 
 Remove every template instruction after replacing it with factual content. The draft needs:
 
-- Actual provider/consumer roles, supported app versions or explicit unreleased status, SDK pin and installation/signing prerequisites.
+- The actual public provider role, any additional consumer role, supported app versions or explicit unreleased status, SDK pin and installation/signing prerequisites.
 - Public canonical schema, typed client generation and DTO semantics. Describe bounded lists, optional fields and anything the schema cannot express.
 - Every action, scope and side effect, subscription/event permissions, mutation admission versus completion, and no automatic replay after uncertainty.
 - End-to-end pairing, persistence, URL routing, saved reconnect, permission replacement, revocation, forgetting and protected-store recovery.
@@ -66,7 +60,7 @@ python3 Scripts/validate-public-integrations.py
 
 The first command checks metadata/sections, artifact links, the SHA-256 pin, module/plugin pin, documented action/scope/method references, consumed contract pins and authoritative schema export/compatibility. Omit `--tools-dir` only for a lightweight metadata check; its output explicitly marks Swift schema validation as NOT RUN. `--allow-draft` allows unfinished template instructions for work in progress; it is not a publication check.
 
-The second command proves the repository's DockFlow example can be generated and compiled in an isolated consumer using only public artifacts and a local copy of the public SDK. It also exercises scaffold, no-overwrite, draft rejection, reference/hash/version/scope and actual-export drift controls. It does not launch apps or run mutations. When adding a new provider guide, add that provider's own exact minimal consumer to the validation workflow; do not claim the existing DockFlow smoke build covers it.
+The second command proves the repository's DockFlow example can be generated and compiled in an isolated consumer using only public artifacts and a local copy of the public SDK. It also exercises provider and dual-role scaffolding, rejects consumer-only entries and missing provider contracts, and checks no-overwrite, draft, reference/hash/version/scope and actual-export drift controls. It does not launch apps or run mutations. When adding a new provider guide, add that provider's own exact minimal consumer to the validation workflow; do not claim the existing DockFlow smoke build covers it.
 
 To compare a guide with an actual exported provider schema, pass one guide and the export:
 
@@ -82,6 +76,6 @@ Run `python3 Scripts/audit-public-source.py` before publication. The guide check
 
 ## Maintain one source of truth
 
-The provider's schema owns wire shape; its app guide owns human semantics; the skill owns the authoring/integration workflow. Generate Swift from JSON. Consumer guides link to the provider's action table instead of repeating it. When the schema changes, update its guide's hash/version and example, then compare the old consumer pin against the new provider export and test the actual app behavior. Never auto-refresh a pin from untrusted discovery metadata.
+The provider's schema owns wire shape; its app guide owns human semantics; the skill owns the authoring/integration workflow. Generate Swift from JSON. Consumer implementation notes link to the provider’s action table instead of creating another registry entry or repeating it. When the schema changes, update its guide's hash/version and example, then compare the old consumer pin against the new provider export and test the actual app behavior. Never auto-refresh a pin from untrusted discovery metadata.
 
 Increment `guideVersion` for documentation/example revisions. Change `contractVersion` only for real API evolution and review compatibility in both required directions. Pin the app's actual supported version once released, and retain honest runtime/platform/distribution limits until tested.

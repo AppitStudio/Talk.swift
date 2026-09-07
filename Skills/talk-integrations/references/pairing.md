@@ -15,6 +15,8 @@ Use the fixed `talk-spike-provider` and `talk-spike-consumer` schemes alongside 
 
 Keep distinct UI states for idle, discoverable, discovering, candidate selected, awaiting consent, saving and saved/connected. `isDiscoverable == false` can mean the single attempt was consumed while consent is still pending; it does not mean the host is ready to restart. Keep an active-mode/generation guard until teardown. Disable conflicting permission, replacement, reload and pairing actions across awaits.
 
+The beta.2 host consumes its discovery session before listener/TLS setup and does not expose a structured setup-failure callback. A countdown alone therefore cannot prove it is still accepting attempts. Distinguish the setup deadline from readiness, keep Cancel usable, and describe an uncertain setup phase without claiming another client can connect. If an attempt times out before consent, use explicit Cancel → Start Pairing → fresh Discover → Connect; do not automatically reuse a candidate or infer that no grant was saved. A later successful retry does not establish the cause of the original timeout.
+
 ## Provider: Start Pairing and consent
 
 1. On the user’s Start Pairing action, freeze the label, exact scopes and optional selected replacement credential ID. Stop any previous completed/cancelled host before starting another mode; serialize stop/start so concurrent UI actions cannot replace each other.
@@ -36,6 +38,8 @@ Keep distinct UI states for idle, discoverable, discovering, candidate selected,
 ## Failure and acceptance boundaries
 
 Pairing is not a distributed transaction. If the provider saved but the consumer failed to save, show the provider-only grant and explicit recovery/revocation. Cancellation cannot undo an already persisted approval. Do not reset user stores or repeatedly generate new grants to hide failures.
+
+Use setup-specific error messages. A denial before approval means pairing was not approved, not that an existing grant needs editing. Discovery runs no action. A pairing timeout/disconnect may require checking the provider for a newly saved grant and revoking that partial result before retrying. Do not show “a preset action may already have completed” for a path that never sent a mutation. Keep the selected operation’s recovery text in one place rather than repeating a generic error beneath it.
 
 Keep setup/durable credentials and private keys out of URLs, logs, clipboard and fixtures. Record comparison success, not code values. Public keys and names remain untrusted hints; matching full codes binds the selected exchange, not the publisher identity.
 

@@ -1,13 +1,12 @@
 # Public app integration guides
 
-Build a feature against an app's public Talk contract without access to its source. Each app uses the same [guide template](TEMPLATE.md), with versioned metadata, a declared role, permissions, lifecycle, typed usage and honest validation evidence.
+Build a feature against an app's public Talk contract without access to its source. Every entry supplies a public provider contract and uses the same [guide template](TEMPLATE.md), with versioned metadata, permissions, lifecycle, typed usage and honest validation evidence.
 
-| App | Exposes actions | Calls other apps | Public guide |
-| --- | --- | --- | --- |
-| DockFlow | List/read/apply presets; observe changes | No Talk consumer API listed | [DockFlow](dockflow/GUIDE.md) |
-| ExtraBar | No provider API currently exposed | DockFlow preset widget | [ExtraBar](extrabar/GUIDE.md) |
+| App | Public contract | Guide |
+| --- | --- | --- |
+| DockFlow | List/read/apply presets; observe changes | [DockFlow](dockflow/GUIDE.md) |
 
-A provider guide is the starting point for calling that app. A consumer-only guide describes implemented outgoing features; it does not imply the app is callable. These are documentation entries, not an app store, publisher verification service or SDK runtime registry. A listing grants neither installation trust nor permissions.
+Read a provider guide to implement calls to that app. Apps that only consume Talk APIs do not publish an entry here; for example, ExtraBar uses the DockFlow guide. An app that both supplies and consumes actions may publish a guide for its own public contract. These are documentation entries, not an app store, publisher verification service or SDK runtime registry. A listing grants neither installation trust nor permissions.
 
 DockFlow's [public contract package](dockflow/Contract/Package.swift) and [consumer recipe](dockflow/Examples/DockFlowRecipe.swift) are sufficient to generate and compile a typed integration without private app code. Generic provider routing is available in Talk `0.1.0-beta.2`; consult the guide's app-version prerequisites before relying on a shipping app build. Talk remains beta; see [readiness](../Docs/BETA-READINESS.md).
 

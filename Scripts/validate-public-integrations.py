@@ -3,6 +3,7 @@
 from datetime import datetime, timezone
 import importlib.util
 import json
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -81,7 +82,7 @@ let package = Package(
         shutil.copy2(ROOT / name, fixture / name)
     cli = fixture / 'Scripts/integration-guides.py'
     canonical = fixture / 'Integrations/dockflow/Contract/Sources/DockFlowTalkContract/Contract.talk.json'
-    run([sys.executable, cli, 'init', 'sample-provider', '--name', 'Sample Provider', '--roles', 'provider',
+    run([sys.executable, cli, 'init', 'sample-provider', '--name', 'Sample Provider',
          '--bundle-id', 'com.example.provider', '--contract', canonical, '--tools-dir', tools], 'scaffold-provider')
     draft = fixture / 'Integrations/sample-provider/GUIDE.md'
     run([sys.executable, cli, 'check', draft, '--allow-draft', '--tools-dir', tools], 'scaffold-draft-structural-check')
@@ -89,10 +90,26 @@ let package = Package(
     run([sys.executable, cli, 'init', 'sample-provider', '--name', 'Collision', '--roles', 'provider',
          '--bundle-id', 'com.example.provider', '--contract', canonical, '--tools-dir', tools],
         'existing-guide-not-overwritten', expected=1)
+    run([sys.executable, cli, 'init', 'sample-dual', '--name', 'Sample Dual', '--roles', 'provider,consumer',
+         '--bundle-id', 'com.example.dual', '--contract', canonical, '--tools-dir', tools,
+         '--consumes', fixture / 'Integrations/dockflow/GUIDE.md'], 'scaffold-dual-role-provider')
+    dual_guide = fixture / 'Integrations/sample-dual/GUIDE.md'
+    run([sys.executable, cli, 'check', dual_guide, '--allow-draft', '--tools-dir', tools],
+        'dual-role-provider-schema-and-reference-check')
     run([sys.executable, cli, 'init', 'sample-consumer', '--name', 'Sample Consumer', '--roles', 'consumer',
-         '--consumes', fixture / 'Integrations/dockflow/GUIDE.md'], 'scaffold-consumer')
-    run([sys.executable, cli, 'check', fixture / 'Integrations/sample-consumer/GUIDE.md', '--allow-draft'],
-        'consumer-scaffold-reference-check')
+         '--bundle-id', 'com.example.consumer', '--contract', canonical, '--tools-dir', tools,
+         '--consumes', fixture / 'Integrations/dockflow/GUIDE.md'], 'consumer-only-scaffold-rejected', expected=1)
+    run([sys.executable, cli, 'init', 'missing-contract', '--name', 'Missing Contract',
+         '--bundle-id', 'com.example.missing', '--tools-dir', tools], 'missing-contract-scaffold-rejected', expected=2)
+    invalid_contract = output / 'InvalidContract.json'
+    invalid_contract.write_text('{"not": "a provider contract"}')
+    run([sys.executable, cli, 'init', 'invalid-contract', '--name', 'Invalid Contract',
+         '--bundle-id', 'com.example.invalid', '--contract', invalid_contract, '--tools-dir', tools],
+        'invalid-contract-scaffold-rejected', expected=1)
+    for name in ('sample-consumer', 'missing-contract', 'invalid-contract'):
+        if (fixture / 'Integrations' / name).exists():
+            raise RuntimeError('Rejected scaffold created an entry: ' + name)
+    passed('rejected-scaffolds-create-no-entries')
 
     spec = importlib.util.spec_from_file_location('guide_cli', cli)
     guide_cli = importlib.util.module_from_spec(spec)
@@ -101,17 +118,18 @@ let package = Package(
     original = guide.read_text()
     schema_original = canonical.read_bytes()
 
-    def rejected(name, mutate, target=guide):
+    def rejected(name, mutate, target=guide, allow_draft=False):
+        before = target.read_text()
         try:
             mutate()
             try:
-                guide_cli.check(target)
+                guide_cli.check(target, allow_draft=allow_draft)
             except (ValueError, KeyError, TypeError):
                 passed(name)
             else:
                 raise RuntimeError(name + ': bad guide accepted')
         finally:
-            guide.write_text(original)
+            target.write_text(before)
             canonical.write_bytes(schema_original)
 
     rejected('changed-contract-hash-rejected', lambda: canonical.write_bytes(schema_original + b'\n'))
@@ -124,13 +142,20 @@ let package = Package(
         '"version": "0.1.0-beta.2"', '"version": "0.1.0-beta.3"', 1)))
     rejected('contract-version-drift-rejected', lambda: guide.write_text(original.replace(
         '"contractVersion": "1.0.0"', '"contractVersion": "2.0.0"', 1)))
-    consumer_guide = fixture / 'Integrations/extrabar/GUIDE.md'
-    consumer_original = consumer_guide.read_text()
-    try:
-        rejected('consumer-contract-pin-drift-rejected', lambda: consumer_guide.write_text(consumer_original.replace(
-            '"contractVersion": "1.0.0"', '"contractVersion": "2.0.0"', 1)), consumer_guide)
-    finally:
-        consumer_guide.write_text(consumer_original)
+    def mutate_metadata(target, mutation):
+        meta, text = guide_cli.metadata(target)
+        mutation(meta)
+        target.write_text(re.sub(r'```json\n.*?\n```',
+                                  lambda _: '```json\n' + json.dumps(meta, indent=2) + '\n```',
+                                  text, count=1, flags=re.S))
+
+    rejected('consumer-only-guide-rejected', lambda: mutate_metadata(guide,
+             lambda meta: meta.update(roles=['consumer'], provider=None)))
+    rejected('null-provider-contract-rejected', lambda: mutate_metadata(guide,
+             lambda meta: meta.update(provider=None)))
+    rejected('dual-role-consumed-contract-pin-drift-rejected', lambda: mutate_metadata(dual_guide,
+             lambda meta: meta['consumes'][0].update(contractVersion='2.0.0')),
+             dual_guide, allow_draft=True)
     run([sys.executable, cli, 'check', guide, '--tools-dir', tools, '--provider-export', canonical],
         'matching-provider-export-check')
     changed_export = output / 'ChangedProvider.json'

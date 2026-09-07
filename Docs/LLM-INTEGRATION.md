@@ -61,7 +61,7 @@ access to DockFlow source. Add DockFlow to Apps I control in Talk Integrations,
 wire the feature I describe to the typed API, and validate the actual signed pair.
 ```
 
-To publish your own app's API, use the same [canonical template and authoring workflow](INTEGRATION-GUIDE-AUTHORING.md). The skill inspects source, describes semantics and runs a deterministic scaffold/check command. There is no required hosted model, model API key or AI dependency in the SDK. Human review still owns the promised semantics and recorded runtime evidence.
+To publish your own app's API, use the same [canonical template and authoring workflow](INTEGRATION-GUIDE-AUTHORING.md). `Integrations/` contains only apps that supply a public contract, including apps that also consume others. A consumer-only app uses the selected provider's guide and does not need its own entry. The skill inspects source, describes semantics and runs a deterministic scaffold/check command. There is no required hosted model, model API key or AI dependency in the SDK. Human review still owns the promised semantics and recorded runtime evidence.
 
 All integrations should follow [Integration UX](INTEGRATION-UX.md): Apps I control is a deliberate outgoing App Library; Apps with access is generic incoming saved consent. A dual-role app keeps each direction's lifecycle and permissions separate.
 

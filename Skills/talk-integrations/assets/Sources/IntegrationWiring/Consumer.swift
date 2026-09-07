@@ -36,14 +36,20 @@ public func connectSaved(_ record: PairingRecord, resolver: EndpointResolver,
     }
 }
 
-// Run in an owned task only for grants with example.observe. Cancelling this flow closes
-// its transport; the owner marks the session disconnected on return, including normal EOF.
-public func observe(_ client: ExampleClient,
-                    accept: @escaping @Sendable (Snapshot) async -> Void) async throws {
+// Run in one owned task with the same grant used to connect this client. Even a read-only
+// session consumes stream termination to detect remote closure. Only an observe grant
+// subscribes or decodes updates. The owner guards accept/end callbacks by session generation
+// and marks disconnected on return/error, including normal EOF. Do not add another iterator.
+public func runSession(_ client: ExampleClient, grant: PairingRecord,
+                       accept: @escaping @Sendable (Snapshot) async -> Void) async throws {
     do {
-        await accept(try await client.subscribe())
+        guard grant.permits("example.view") else { throw TalkError.permissionDenied }
+        try Task.checkCancellation()
+        let receivesChanges = grant.permits("example.observe")
+        await accept(try await (receivesChanges ? client.subscribe() : client.snapshot()))
         for try await message in client.transport.events {
             try Task.checkCancellation()
+            guard receivesChanges else { continue }
             switch try client.decodeEvent(message) {
             case .changed(let snapshot): await accept(snapshot)
             }

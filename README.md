@@ -80,7 +80,7 @@ Give users one **Talk Integrations** settings destination with **Apps I control*
 | [Discoverable pairing](Docs/DISCOVERABLE-PAIRING.md) | Pairing mode, discovery, code verification and consent |
 | [Integration](Docs/INTEGRATION-GUIDE.md) | Provider handlers, pairing, clients, events, and lifecycle |
 | [Integration UX](Docs/INTEGRATION-UX.md) | Two directions, App Library, consent, statuses and access management |
-| [Public app guides](Integrations/README.md) | Integrate with DockFlow using its public contract; inspect app roles |
+| [Provider integration guides](Integrations/README.md) | Call apps such as DockFlow using their public contracts |
 | [Publish an app guide](Docs/INTEGRATION-GUIDE-AUTHORING.md) | One template, deterministic scaffolding and validation |
 | [Contracts](Docs/CONTRACTS.md) | Supported types, code generation, and directional compatibility |
 | [Example apps](Docs/EXAMPLES.md) | Build and pair Talk Studio and Talk Automator |
@@ -104,7 +104,7 @@ and scoped consent. Validate cancellation, saved reconnect, restart, and revocat
 
 The skill supports provider-only, consumer-only, or both-role work. Other coding agents can read its `SKILL.md` and linked resources directly.
 
-To integrate with a published app without its private source, supply its [app guide](Integrations/README.md) and the behavior you want. To expose your own app, ask the same skill to create an integration guide from the canonical template and validate it against the actual exported contract. Neither workflow needs a hosted LLM service in your app.
+To integrate with a published app without its private source, supply its [provider guide](Integrations/README.md) and the behavior you want. The directory lists only apps that supply a contract; consumer-only apps use those guides without creating their own entry. To expose your own app, ask the same skill to create an integration guide from the canonical template and validate it against the actual exported contract. Neither workflow needs a hosted LLM service in your app.
 
 ## Build and contribute
 

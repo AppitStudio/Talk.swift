@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Scaffold/check the one public Talk app-guide format; Python standard library only."""
+"""Scaffold/check public Talk provider guides; Python standard library only."""
 import argparse
 from datetime import date
 import hashlib
@@ -68,7 +68,8 @@ def check(path, tools=None, allow_draft=False, provider_export=None):
     require(allow_draft or '{{' not in text, 'unfilled template instructions')
     roles = meta['roles']
     require(isinstance(roles, list) and roles and len(set(roles)) == len(roles)
-            and set(roles) <= {'provider', 'consumer'}, 'invalid roles')
+            and set(roles) <= {'provider', 'consumer'} and 'provider' in roles,
+            'Integrations entries require the provider role and a public contract')
     require(re.findall(r'^## .+$', text, re.M) == HEADINGS, 'use the canonical template section order')
     for section in HEADINGS:
         body = text.split(section + '\n', 1)[1].split('\n## ', 1)[0].strip()
@@ -80,51 +81,49 @@ def check(path, tools=None, allow_draft=False, provider_export=None):
             'SDK reference must pin a version of the canonical repository')
     require(isinstance(meta['consumes'], list), 'consumes must be a list')
     require(('consumer' in roles) == bool(meta['consumes']), 'consumer role needs a known outgoing library')
-    require(('provider' in roles) == (meta['provider'] is not None), 'provider role/contract mismatch')
+    require(isinstance(meta['provider'], dict), 'a public provider contract is required; provider cannot be null')
     for item in meta['consumes']:
         require(set(item) == {'app', 'guide', 'contractID', 'contractVersion'}, 'invalid consumed contract')
         other_path = inside(path.parent, item['guide'])
         other, _ = metadata(other_path)
-        require(other['app'] == item['app'] and other['provider'] is not None, 'outgoing guide is not that provider')
+        require(other['app'] == item['app'] and 'provider' in other['roles']
+                and isinstance(other['provider'], dict), 'outgoing guide is not that provider')
         require(other['provider']['contractID'] == item['contractID'] and
                 other['provider']['contractVersion'] == item['contractVersion'], 'outgoing contract pin mismatch')
-    if meta['provider'] is not None:
-        provider = meta['provider']
-        require(set(provider) == {'bundleID', 'contract', 'contractID', 'contractVersion', 'sha256', 'module'},
-                'invalid provider metadata')
-        require(re.fullmatch(r'[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+', provider['bundleID']) is not None,
-                'invalid provider routing bundle ID')
-        require(re.fullmatch(r'[A-Za-z][A-Za-z0-9]*', provider['module']) is not None, 'invalid Swift module')
-        schema_path = inside(path.parent, provider['contract'])
-        require(digest(schema_path) == provider['sha256'], 'contract SHA-256 mismatch; review/update guide with contract')
-        schema = json.loads(schema_path.read_text())
-        require(schema['contractID'] == provider['contractID'] and
-                schema['contractVersion'] == provider['contractVersion'], 'contract identity/version mismatch')
-        require(schema_path.relative_to(path.parent).as_posix() ==
-                f"Contract/Sources/{provider['module']}/Contract.talk.json", 'unexpected contract module layout')
-        manifest = inside(path.parent, 'Contract/Package.swift').read_text()
-        require(f'name: "{provider["module"]}"' in manifest and 'TalkClientPlugin' in manifest and
-                SDK_URL in manifest and f'exact: "{sdk["version"]}"' in manifest, 'contract package pin/plugin mismatch')
-        permissions = text.split('## Actions, permissions, and side effects\n', 1)[1].split('\n## ', 1)[0]
-        for action in schema['actions']:
-            require(f"`{action['id']}`" in permissions and f"`{action['scope']}`" in permissions
-                    and f"`{action['method']}" in permissions, 'undocumented action/scope/method: ' + action['id'])
-        for event in schema['events']:
-            require(f"`{event['id']}`" in permissions, 'undocumented event: ' + event['id'])
-        if tools:
-            with tempfile.TemporaryDirectory(prefix='talk-guide-check-') as temp:
-                canonical = Path(temp) / 'canonical.json'
-                tool_run(tools, 'TalkSchemaExporter', schema_path, canonical)
-                require(canonical.read_bytes() == schema_path.read_bytes(), 'publish canonical exporter output')
-                tool_run(tools, 'TalkContractChecker', schema_path, schema_path)
-                if provider_export:
-                    actual = Path(temp) / 'actual.json'
-                    tool_run(tools, 'TalkSchemaExporter', provider_export, actual)
-                    require(actual.read_bytes() == canonical.read_bytes(), 'public schema differs from provider export')
-        elif provider_export:
-            raise ValueError('--provider-export requires --tools-dir')
+    provider = meta['provider']
+    require(set(provider) == {'bundleID', 'contract', 'contractID', 'contractVersion', 'sha256', 'module'},
+            'invalid provider metadata')
+    require(re.fullmatch(r'[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+', provider['bundleID']) is not None,
+            'invalid provider routing bundle ID')
+    require(re.fullmatch(r'[A-Za-z][A-Za-z0-9]*', provider['module']) is not None, 'invalid Swift module')
+    schema_path = inside(path.parent, provider['contract'])
+    require(digest(schema_path) == provider['sha256'], 'contract SHA-256 mismatch; review/update guide with contract')
+    schema = json.loads(schema_path.read_text())
+    require(schema['contractID'] == provider['contractID'] and
+            schema['contractVersion'] == provider['contractVersion'], 'contract identity/version mismatch')
+    require(schema_path.relative_to(path.parent).as_posix() ==
+            f"Contract/Sources/{provider['module']}/Contract.talk.json", 'unexpected contract module layout')
+    manifest = inside(path.parent, 'Contract/Package.swift').read_text()
+    require(f'name: "{provider["module"]}"' in manifest and 'TalkClientPlugin' in manifest and
+            SDK_URL in manifest and f'exact: "{sdk["version"]}"' in manifest, 'contract package pin/plugin mismatch')
+    permissions = text.split('## Actions, permissions, and side effects\n', 1)[1].split('\n## ', 1)[0]
+    for action in schema['actions']:
+        require(f"`{action['id']}`" in permissions and f"`{action['scope']}`" in permissions
+                and f"`{action['method']}" in permissions, 'undocumented action/scope/method: ' + action['id'])
+    for event in schema['events']:
+        require(f"`{event['id']}`" in permissions, 'undocumented event: ' + event['id'])
+    if tools:
+        with tempfile.TemporaryDirectory(prefix='talk-guide-check-') as temp:
+            canonical = Path(temp) / 'canonical.json'
+            tool_run(tools, 'TalkSchemaExporter', schema_path, canonical)
+            require(canonical.read_bytes() == schema_path.read_bytes(), 'publish canonical exporter output')
+            tool_run(tools, 'TalkContractChecker', schema_path, schema_path)
+            if provider_export:
+                actual = Path(temp) / 'actual.json'
+                tool_run(tools, 'TalkSchemaExporter', provider_export, actual)
+                require(actual.read_bytes() == canonical.read_bytes(), 'public schema differs from provider export')
     elif provider_export:
-        raise ValueError('--provider-export requires a provider guide')
+        raise ValueError('--provider-export requires --tools-dir')
     # Markdown links must resolve inside this checkout. The separate public-source
     # audit determines publication eligibility. Remote links are not fetched.
     for target in re.findall(r'\[[^\]]*\]\(([^)]+)\)', text):
@@ -137,33 +136,31 @@ def check(path, tools=None, allow_draft=False, provider_export=None):
 def scaffold(args):
     require(re.fullmatch(r'[a-z][a-z0-9-]*', args.app) is not None, 'invalid app slug')
     roles = args.roles.split(',')
-    require(roles and len(roles) == len(set(roles)) and set(roles) <= {'provider', 'consumer'}, 'invalid roles')
+    require(roles and len(roles) == len(set(roles)) and set(roles) <= {'provider', 'consumer'}
+            and 'provider' in roles, 'Integrations entries require the provider role and a public contract')
     dest = ROOT / 'Integrations' / args.app
     require(not dest.exists(), 'destination already exists; existing guides are never overwritten')
-    require(('provider' in roles) == bool(args.contract and args.bundle_id),
-            'provider needs both --contract and --bundle-id; consumer-only must omit them')
-    require('provider' in roles or not (args.contract or args.bundle_id or args.module),
-            'consumer-only scaffolds must not include provider arguments')
-    require(('consumer' in roles) == bool(args.consumes), 'consumer needs --consumes PATH/TO/GUIDE.md')
-    provider, consumes = None, []
-    schema = None
-    if args.contract:
-        require(args.tools_dir is not None, 'provider scaffolding needs --tools-dir for canonical schema export')
-        with tempfile.TemporaryDirectory(prefix='talk-guide-init-') as temp:
-            canonical = Path(temp) / 'Contract.talk.json'
-            tool_run(args.tools_dir, 'TalkSchemaExporter', args.contract, canonical)
-            schema_bytes = canonical.read_bytes()
-            schema = json.loads(schema_bytes)
-        module = args.module or schema['name'] + 'Contract'
-        require(re.fullmatch(r'[A-Za-z][A-Za-z0-9]*', module) is not None, 'invalid Swift module')
-        provider = {'bundleID': args.bundle_id, 'contract': f'Contract/Sources/{module}/Contract.talk.json',
-                    'contractID': schema['contractID'], 'contractVersion': schema['contractVersion'],
-                    'sha256': hashlib.sha256(schema_bytes).hexdigest(), 'module': module}
+    require(args.contract and args.bundle_id and args.tools_dir,
+            'provider scaffolding requires --contract, --bundle-id and --tools-dir')
+    require(('consumer' in roles) == bool(args.consumes),
+            'a dual-role provider needs --consumes PATH/TO/PROVIDER/GUIDE.md')
+    with tempfile.TemporaryDirectory(prefix='talk-guide-init-') as temp:
+        canonical = Path(temp) / 'Contract.talk.json'
+        tool_run(args.tools_dir, 'TalkSchemaExporter', args.contract, canonical)
+        schema_bytes = canonical.read_bytes()
+        schema = json.loads(schema_bytes)
+    module = args.module or schema['name'] + 'Contract'
+    require(re.fullmatch(r'[A-Za-z][A-Za-z0-9]*', module) is not None, 'invalid Swift module')
+    provider = {'bundleID': args.bundle_id, 'contract': f'Contract/Sources/{module}/Contract.talk.json',
+                'contractID': schema['contractID'], 'contractVersion': schema['contractVersion'],
+                'sha256': hashlib.sha256(schema_bytes).hexdigest(), 'module': module}
+    consumes = []
     for supplied in args.consumes or []:
         guide = supplied.resolve()
         require(guide.is_relative_to((ROOT / 'Integrations').resolve()), 'consumed guide must be in Integrations')
         pinned, _ = metadata(guide)
-        require(pinned['provider'] is not None, 'consumed guide exposes no provider API')
+        require('provider' in pinned['roles'] and isinstance(pinned['provider'], dict),
+                'consumed guide exposes no provider API')
         consumes.append({'app': pinned['app'], 'guide': f"../{pinned['app']}/GUIDE.md",
                          'contractID': pinned['provider']['contractID'],
                          'contractVersion': pinned['provider']['contractVersion']})
@@ -174,21 +171,19 @@ def scaffold(args):
     output = TEMPLATE.read_text().replace('{{display_name}}', args.name)
     output = re.sub(r'```json\n.*?\n```', lambda _: '```json\n' + json.dumps(meta, indent=2) + '\n```',
                     output, count=1, flags=re.S)
-    if schema:
-        table = '| Action | Generated method | Scope | Mutation | Meaning |\n| --- | --- | --- | --- | --- |\n'
-        for action in schema['actions']:
-            table += f"| `{action['id']}` | `{action['method']}()` | `{action['scope']}` | {str(action['mutation']).lower()} | {{{{describe semantics}}}} |\n"
-        for event in schema['events']:
-            table += f"\nEvent `{event['id']}`: `" + event['payload'] + '`; {{subscription permission and semantics}}.\n'
-        output = output.replace('{{permissions}}', table)
-        output = output.replace('{{contract}}', f"Source of truth: [public contract]({provider['contract']}). {{{{document DTO semantics and limits}}}}")
+    table = '| Action | Generated method | Scope | Mutation | Meaning |\n| --- | --- | --- | --- | --- |\n'
+    for action in schema['actions']:
+        table += f"| `{action['id']}` | `{action['method']}()` | `{action['scope']}` | {str(action['mutation']).lower()} | {{{{describe semantics}}}} |\n"
+    for event in schema['events']:
+        table += f"\nEvent `{event['id']}`: `" + event['payload'] + '`; {{subscription permission and semantics}}.\n'
+    output = output.replace('{{permissions}}', table)
+    output = output.replace('{{contract}}', f"Source of truth: [public contract]({provider['contract']}). {{{{document DTO semantics and limits}}}}")
     dest.mkdir()
-    if provider:
-        contract = dest / provider['contract']
-        contract.parent.mkdir(parents=True)
-        contract.write_bytes(schema_bytes)
-        (contract.parent / 'Module.swift').write_text('// The TalkClientPlugin generates this module from Contract.talk.json.\n')
-        (dest / 'Contract/Package.swift').write_text(package_manifest(provider['module']))
+    contract = dest / provider['contract']
+    contract.parent.mkdir(parents=True)
+    contract.write_bytes(schema_bytes)
+    (contract.parent / 'Module.swift').write_text('// The TalkClientPlugin generates this module from Contract.talk.json.\n')
+    (dest / 'Contract/Package.swift').write_text(package_manifest(provider['module']))
     (dest / 'GUIDE.md').write_text(output)
     print('Created ' + str((dest / 'GUIDE.md').relative_to(ROOT)) + '; draft instructions remain for author review.')
 
@@ -216,12 +211,12 @@ def main():
     init = commands.add_parser('init', help='create a draft from the canonical template')
     init.add_argument('app')
     init.add_argument('--name', required=True)
-    init.add_argument('--roles', required=True, help='provider, consumer, or provider,consumer')
-    init.add_argument('--contract', type=Path)
-    init.add_argument('--bundle-id')
+    init.add_argument('--roles', default='provider', help='provider (default), or provider,consumer; a public contract is required')
+    init.add_argument('--contract', type=Path, required=True)
+    init.add_argument('--bundle-id', required=True)
     init.add_argument('--module')
     init.add_argument('--consumes', type=Path, action='append')
-    init.add_argument('--tools-dir', type=Path)
+    init.add_argument('--tools-dir', type=Path, required=True)
     verify = commands.add_parser('check', help='validate guide metadata, references and contract pins')
     verify.add_argument('guides', type=Path, nargs='*')
     verify.add_argument('--tools-dir', type=Path)

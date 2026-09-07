@@ -4,6 +4,8 @@
 
 Build the host's actual schemes/targets using its normal authorized local configuration. Typecheck generated clients and provider handlers, and run targeted domain/permission/lifecycle tests. For SDK changes run its applicable tests and contract pipeline. SDK tests alone are not evidence for host wiring.
 
+Verify the real project requirement, shared-contract manifest, `Package.resolved` and fetched SDK commit agree. If a temporary local SDK override was used, label its result separately and build the normal dependency setup before claiming the user's build is fixed. Record which binaries actually ran: a native test on an older running app does not validate later source fixes or a newly compiled binary.
+
 The skill includes a read-only validator using Python 3, macOS `codesign`, and optionally already-built Talk tools. Set `TALK_SKILL_ROOT` to this skill directory and `TALK_TOOLS` to the SDK binary directory (obtain it with `swift build --package-path "$TALK_SDK_ROOT" --show-bin-path` after building).
 
 ```sh
@@ -31,6 +33,8 @@ Use synthetic app data and separate test grants. Exercise only the configuration
 | Least privilege | A read-only grant reads; a forbidden mutation/subscription returns `permissionDenied` and the provider state remains unchanged. Exercise the call path, not only disabled UI. |
 | Saved consent | Repeated permitted actions and manual reconnect work without new permission prompts. Quit/reopen each app, then both, and repeat with the same saved grant. |
 | Events | Initial subscription snapshot and later mutation events reach the active session in order; older revisions cannot overwrite newer results. Read-only sessions do not subscribe. |
+| Read-only transport closure | Provider reload/stop/revocation ends the consumer's live status through stream termination even without observe scope; no subscription or polling is added, and saved access remains until explicitly forgotten. |
+| Contextual setup recovery | Discovery timeout, pre-approval denial, pairing timeout and connect failure each show their own recovery, without duplicate text or mutation-completion warnings. An uncertain pairing save prompts checking provider access before a fresh attempt. |
 | Disconnect/uncertainty | Disconnect or cancel an in-flight synthetic mutation; UI reports/reconciles actual state and never automatically replays. Close/replace a session while connection is pending; it must not resurrect. |
 | Event recovery | Simulate stream loss (and bounded overflow where a controllable harness is available); old task ends, explicit reconnect obtains a fresh snapshot and acknowledges the gap. |
 | Multiple grants | Two independent grants operate; revoking one cancels only its sessions and the other remains usable. |
@@ -53,9 +57,9 @@ Classify unavailable fault injection as NOT RUN or BLOCKED, not a pass. Sleep/wa
 | `credentialOperationPending` | Stop changing records, let the outstanding operation finish, then explicitly reload. |
 | `unavailable` / `ambiguousProvider` | Inspect registered copies, final metadata, app startup, schemes, allowlist, and count of running callback receivers. Do not pick the first candidate. |
 | `pairingRequired` / expired/invalid invitation | Inspect selected grant/expiry; explicitly start a new pairing flow when appropriate. Never reuse/log the old secret. |
-| `permissionDenied` | Compare that record's scopes to the action's mapped scope; use fresh replacement consent for changes. |
+| `permissionDenied` | During pairing, report that approval was denied. For an existing action, compare the record's scopes to the action's mapped scope and use fresh replacement consent for changes. |
 | `ContractDiagnostic` / `unsupportedVersion` | Compare pinned client → actual provider contracts and selected capabilities/minimum minor. Re-pairing alone does not fix schema incompatibility. |
-| `timedOut` / `disconnected` / cancellation | Reconcile any sent mutation before a new action; never assume rollback. Check startup URL queues for cold-launch failures. |
+| `timedOut` / `disconnected` / cancellation | Identify the failed phase. Discovery needs provider readiness; pairing may leave provider-only access; a read-only connect failure needs session/access recovery. Reconcile any sent mutation before a new action, never assume rollback. Check startup URL queues for cold-launch failures. |
 | `eventOverflow` / `busy` | Respect bounded capacity. Reconnect/resubscribe for a fresh snapshot after event loss; do not loop/replay mutations. |
 | `invalidMessage` / `unknownAction` | Check stable IDs, payload shape, domain validation and generated/bundled schema consistency. |
 

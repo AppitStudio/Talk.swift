@@ -32,6 +32,10 @@ For an installed app, inspect its existing signing lane and normal startup requi
 
 When two app workspaces are open, a shared local package override can produce “Missing package product” in the second workspace. Prefer consistent remote pins in both apps and their contract packages; use a temporary local override in one workspace when developing the SDK. Do not silently rewrite the user’s chosen dependency setup.
 
+Before handing off an SDK API change, check every real app project requirement, shared-contract `Package.swift`, `Package.resolved` and fetched SDK revision. Build the user's normal scheme/configuration without temporary overrides if that is how they work. In particular, omitting `allowedCallbackBundleIDs` requires beta.2 at both setup and saved-reconnect call sites; compiling against local main while the actual project remains on beta.1 leaves a broken handoff. Publish a reviewed SDK version under existing authorization before adopting its remote pin; otherwise report that dependency step as pending. Do not move an existing tag or restore a hard-coded consumer list to hide the mismatch.
+
+If resolution stalls while Xcode owns a package update, inspect its current task and any external-change dialog before deleting caches or changing pins. Closing only an idle affected project can release file coordination; first check whether closing it would stop a user’s running app or lose unsaved work. Reopen it after resolution and preserve unrelated project edits. A stalled resolver is not evidence of a package API failure.
+
 ## Provider metadata
 
 Merge into Info.plist, preserving other URL types:
@@ -51,10 +55,10 @@ Export JSON to `Contents/Resources/Contract.talk.json` before final signing. Dis
 
 Declare `talk-spike-consumer` in the consumer's `CFBundleURLTypes`. An app with both roles declares both schemes. These **scheme strings are currently hardcoded** in `EndpointResolver`/`ProviderDiscovery`: customize bundle/contract IDs, but do not rename schemes without a coordinated SDK change.
 
-Route incoming URLs through the existing delegate/SwiftUI lifecycle, preserving other handlers. Consumer URLs go to both a long-lived `PairingDiscovery.receive(_:)` and `EndpointResolver.receive(_:)`. Provider URLs go to `DiscoverablePairingHost.receive(_:)` and `EndpointResolver.reply(...)` using current `TalkProvider.endpoints()` and an explicit supported-consumer bundle allowlist. This allowlist is routing policy, not publisher verification.
+Route incoming URLs through the existing delegate/SwiftUI lifecycle, preserving other handlers. Consumer URLs go to both a long-lived `PairingDiscovery.receive(_:)` and `EndpointResolver.receive(_:)`. Provider URLs go to `DiscoverablePairingHost.receive(_:)` and `EndpointResolver.reply(...)` using current `TalkProvider.endpoints()`. With beta.2, omit the optional callback allowlist at both provider call sites to support future consumers. An explicit list is only for a deliberately closed product policy, not publisher verification.
 
 Launch each finished app once at its intended local installation to register it with LaunchServices, then inspect `ProviderDiscovery.installed()`. Preserve unavailable candidates for diagnosis. No daemon or cloud service is needed.
 
-At reconnect call `NSWorkspace.shared.urlsForApplications(withBundleIdentifier:)`, `ProviderDiscovery.uniqueInstallation(...)`, then `EndpointResolver.resolve(record:applicationURL:callbackBundleID:)`. Do not select the first duplicate or retain an old listener port. Cold launch URLs can arrive before restoration; buffer a bounded number (the demo uses four) until startup completes. Callback delivery requires exactly one running consumer process with the allowed ID. Resolve duplicates using intended test copies; do not delete arbitrary apps or globally rebuild LaunchServices.
+At reconnect call `NSWorkspace.shared.urlsForApplications(withBundleIdentifier:)`, `ProviderDiscovery.uniqueInstallation(...)`, then `EndpointResolver.resolve(record:applicationURL:callbackBundleID:)`. Do not select the first duplicate or retain an old listener port. Cold launch URLs can arrive before restoration; buffer a bounded number (the demo uses four) until startup completes. Callback delivery requires exactly one running consumer process for the validated callback ID. Resolve duplicates using intended test copies; do not delete arbitrary apps or globally rebuild LaunchServices.
 
 Run [the preflight helper](../scripts/validate-app.py) on the final bundles; commands and its limits are in [validation](validation.md).

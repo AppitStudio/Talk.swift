@@ -41,7 +41,7 @@ Signing and host startup remain prerequisites. Verify normal licensed startup, t
 
 ## Protocol and trust boundary
 
-The SDK uses existing LaunchServices URL routing, not Bonjour, shared storage, clipboard, plaintext sockets, an external listener, or a daemon. The provider and consumer must declare the existing `talk-spike-provider` and `talk-spike-consumer` schemes. Replies target exactly one running consumer process from an explicit bundle-ID allowlist. Neither that allowlist nor the OS's routing proves the peer's publisher.
+The SDK uses existing LaunchServices URL routing, not Bonjour, shared storage, clipboard, plaintext sockets, an external listener, or a daemon. The provider and consumer must declare the existing `talk-spike-provider` and `talk-spike-consumer` schemes. Replies require a valid callback bundle ID and exactly one running consumer process; an optional explicit allowlist further restricts routing. Neither that policy nor the OS's routing proves the peer's publisher.
 
 Discovery advertises an ephemeral X25519 public key, random mode ID and expiration. Connect supplies a new consumer public key and random request ID. CryptoKit performs X25519 agreement and HKDF-SHA256 with a length-delimited transcript binding both public keys, roles, mode/request IDs and bundle routing labels. Separate HKDF labels derive the 256-bit setup credential and a 48-bit, twelve-hex-digit verification code. The consumer fixes the advertised provider key before generating its private key/request nonce; the provider permits one valid exchange per user-started mode. Never shorten, replace, auto-accept or treat the visible code as a password.
 

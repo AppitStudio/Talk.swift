@@ -9,7 +9,7 @@
   "guideVersion": "1.0.0",
   "updated": "{{YYYY-MM-DD}}",
   "status": "draft",
-  "roles": ["{{provider_or_consumer}}"],
+  "roles": ["provider"],
   "sdk": {
     "repository": "https://github.com/AppitStudio/Talk.swift.git",
     "version": "0.1.0-beta.2"

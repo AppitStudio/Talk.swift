@@ -1,6 +1,6 @@
 ---
 name: talk-integrations
-description: Add or audit end-to-end Talk.swift SDK integrations between macOS apps, from package installation and provider registration to typed contracts, discoverable pairing, persistent scoped consent, calls, events, and signed-app validation. Use for apps exposing or consuming Talk capabilities and for authoring their public integration guides.
+description: Add or audit Talk.swift integrations in macOS apps that expose or consume typed actions, including pairing, scoped consent, calls, events, and signed-app validation. Also author public integration guides for apps that supply a Talk contract.
 ---
 
 # Talk SDK integrations
@@ -15,7 +15,7 @@ Inspect the host's instructions, project/package configuration, app lifecycle, s
 
 Read the SDK's `Package.swift`, `Docs/INSTALLATION.md`, `Docs/INTEGRATION-GUIDE.md`, `Docs/DISCOVERABLE-PAIRING.md`, `Docs/CONTRACTS.md`, and relevant `Sources/Talk` APIs. Check `Docs/BETA-READINESS.md` for qualification limits; do not copy historical test counts into a new app's results. This skill covers beta `0.1.0-beta.2`: Swift tools 6.2, declared macOS 12.4 minimum, explicit pairing and the sole data-protection Keychain backend. If the checked-out APIs differ, adapt against that source and record the difference.
 
-For a public app integration, read the selected provider guide in the SDK’s `Integrations/` registry and [public guide workflow](references/guides.md). Consumer-only guides do not expose callable APIs. Use exported artifacts without requiring private app source; preserve unsupported or unreleased version limits. For guide-authoring work, follow the same reference and canonical SDK template rather than inventing another format.
+For a public app integration, read the selected provider guide in the SDK’s `Integrations/` directory and [public guide workflow](references/guides.md). This directory contains only apps that supply a contract. A consumer uses the provider’s guide; using the SDK does not warrant its own directory entry. Use exported artifacts without requiring private app source; preserve unsupported or unreleased version limits. To publish an app’s API, follow the same reference and canonical SDK template rather than inventing another format.
 
 Determine which app exposes actions (provider), which calls them (consumer), their bundle IDs, the actual automation trigger, expected data/side effects, scopes, and whether live events are needed. For consumer-only work, use the provider's supplied contract; do not invent action IDs. An app can play both roles, with separate provider and consumer archives. Ask only for consequential details not supplied by code or user; continue independent setup work.
 
@@ -25,7 +25,7 @@ Determine which app exposes actions (provider), which calls them (consumer), the
 2. Read [contract and generation](references/contracts.md). Define or consume the API and generate a shared contract module. Use [the starter assets](assets/Package.swift) for a new module; adapt the synthetic domain to the requested integration.
 3. Read [discoverable pairing](references/pairing.md) and [provider and consumer lifecycle](references/lifecycle.md). Default to Start Pairing → Discover → Connect, full-code comparison and visible scoped consent. Implement saved grants, URL delivery, calls/events, reconnect, revocation and recovery. Preserve an explicitly requested manual-invitation workflow.
 4. For settings/consent UI, read [integration UX](references/integration-ux.md) and the SDK’s `Docs/INTEGRATION-UX.md`. Use Talk Integrations with separate Apps I control (implemented outgoing library) and Apps with access (generic incoming grants); do not infer reverse permissions or supported features from discovery.
-5. Read [validation and troubleshooting](references/validation.md). Run relevant builds, bundle checks and actual-app scenarios. Fix failures in scope and repeat affected checks. Distinguish pass, fail, blocked and not run.
+5. Read [validation and troubleshooting](references/validation.md). Verify the actual project and contract dependency pins, then build the normal app configuration. A temporary SDK override proves only that development setup. Run bundle checks and actual-app scenarios; distinguish pass, fail, blocked and not run.
 
 ## SDK invariants
 
@@ -37,6 +37,7 @@ Determine which app exposes actions (provider), which calls them (consumer), the
 - Keep TLS, Keychain protection and resource bounds intact. Failed protected writes freeze changes until explicit recovery/reload. Consumer forgetting is not provider revocation.
 - Do not replay mutations after timeout, cancellation or disconnect. Reconcile app state and report uncertainty. Events have no durable replay; resubscription starts from a fresh snapshot.
 - Own pairing hosts, transports and tasks explicitly. Guard operations across actor suspension, cancel/close on teardown, and prevent old sessions from updating new UI state.
+- Observe transport termination even in read-only sessions. Receiving a local stream’s termination does not require subscribing to provider events; subscribe and decode event payloads only with the granted scope. Use operation-specific recovery for discovery, pairing, connecting and mutations.
 
 ## Scope and completion
 

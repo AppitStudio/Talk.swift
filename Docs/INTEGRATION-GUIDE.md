@@ -98,7 +98,7 @@ Pairing is not a distributed transaction: the provider may save a grant before t
 
 ## Resolve, connect, call and subscribe
 
-AutomatorSession owns one client and one event task per saved provider grant. At reconnect, resolve exactly one registered installation using `ProviderDiscovery.uniqueInstallation`; duplicate/stale candidates fail visibly. `EndpointResolver.resolve` launches the exact app URL and obtains a fresh public endpoint. Its callback is only a hint: TLS authenticates the paired key. Pass incoming app URLs to `EndpointResolver.receive`; the provider replies using the matching entry in `TalkProvider.endpoints()` and a deliberately narrow callback bundle allowlist. See both AppDelegate files and StudioModel.handleURL. Callback delivery requires exactly one running process with the allowed bundle ID; multiple processes are ambiguous even when their app paths match. Bundle IDs remain routing hints, never OS-verified peer identity.
+AutomatorSession owns one client and one event task per saved provider grant. At reconnect, resolve exactly one registered installation using `ProviderDiscovery.uniqueInstallation`; duplicate/stale candidates fail visibly. `EndpointResolver.resolve` launches the exact app URL and obtains a fresh public endpoint. Its callback is only a hint: TLS authenticates the paired key. Pass incoming app URLs to `EndpointResolver.receive`; the provider replies using the matching entry in `TalkProvider.endpoints()`. The manual demo uses a deliberately narrow callback allowlist; an open provider on beta.2 should omit that optional list at both pairing and reconnect call sites. See both AppDelegate files and StudioModel.handleURL. Callback delivery requires exactly one running process for the validated bundle ID; multiple processes are ambiguous even when their app paths match. Bundle IDs remain routing hints, never OS-verified peer identity.
 
 Declare the received URL schemes in each app's `CFBundleURLTypes`: `talk-spike-provider` for the provider and `talk-spike-consumer` for the consumer. The signed example builder includes them. An explicit application URL alone did not suffice for the sandboxed sender in the disposable routing probe when the receiver advertised an unrelated scheme; correcting its declaration restored delivery. Opt-in diagnostics (`TALK_TRANSPORT_DIAGNOSTICS=1`) retain a bounded numeric callback-delivery error code without URL or credential data. See [separate-process validation](PROCESS-VALIDATION.md) for the actual duplicate-copy matrix and its limits.
 
@@ -130,7 +130,7 @@ func runGuideClient(port: UInt16, record: PairingRecord) async throws {
 }
 ```
 
-Own and cancel this long-lived event task when disconnecting. Read-only connections call `snapshot()` instead of `subscribe()`. Events are bounded live delivery: no replay, and overflow closes the session with `eventOverflow`. Reconnect with a new transport and subscribe for a fresh snapshot. For Studio, compare both `sessionID` and `revision` so a late older event does not overwrite a newer snapshot.
+Own and cancel this long-lived event task when disconnecting. Read-only connections call `snapshot()` instead of `subscribe()`, then still consume the local `transport.events` stream to detect termination; they do not decode/apply event payloads without permission. Use one iterator per session, and update live status on normal completion or error without removing saved access. Events are bounded live delivery: no replay, and overflow closes the session with `eventOverflow`. Reconnect with a new transport and subscribe for a fresh snapshot only when permitted. For Studio, compare both `sessionID` and `revision` so a late older event does not overwrite a newer snapshot.
 
 By default the generated client requires all actions/events in its build-time schema. A newer client may deliberately select old capabilities using `requiredActions` and `requiredEvents` in its initializer; methods outside that negotiated set are rejected. `minimumMinor` defaults to zero to allow structurally compatible subsets on older providers. Set it explicitly when application semantics require a newer minor. Major mismatches always fail. The compatibility fixtures run actual independently generated clients in both directions.
 
@@ -138,9 +138,10 @@ By default the generated client requires all actions/events in its build-time sc
 
 | Result | Application response |
 | --- | --- |
-| `permissionDenied` | Inspect this integration's scopes. Ask for additional consent via replacement pairing. |
+| `permissionDenied` | During pairing, report that approval was denied and offer a fresh explicit attempt. For an existing action, inspect its grant's scopes and use replacement pairing for additional consent. |
 | `ContractDiagnostic` / `unsupportedVersion` | Show the incompatibility; choose a supported capability subset or update/re-pair as appropriate. No unsupported handler has run. |
-| `disconnected`, `timedOut`, cancellation after sending | Mutation outcome may be unknown. Reconcile application state; **never automatically retry**. |
+| `disconnected`, `timedOut`, cancellation after sending a mutation | Mutation outcome may be unknown. Reconcile application state; **never automatically retry**. |
+| Discovery, pairing or read-only connection failure | Show recovery for that phase, without a mutation-completion warning. An uncertain pairing save may leave provider-only access; inspect that grant before retrying. |
 | `eventOverflow` | Reconnect and resubscribe for a fresh snapshot; acknowledge the gap. |
 | `busy` | The bounded work limit is reached. Do not blindly repeat mutations. |
 | `credentialOperationPending` | Freeze changes. Reload actual storage after the system operation finishes. Never claim durable revocation yet. |

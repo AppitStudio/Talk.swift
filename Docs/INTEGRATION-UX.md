@@ -13,6 +13,8 @@ This is the recommended host-app interface, not a SwiftUI component shipped by T
 
 **The App Library is a curated feature list.** Adding a provider requires the consumer developer to implement its contract and connect it to an actual feature. Discovery only finds installations and pairing availability for supported entries; it cannot create a new integration or make an arbitrary API safe to call. A provider being installed does not imply it is paired, compatible, available for pairing, or connected.
 
+The public `Integrations/` directory lists only apps that supply contracts. A consumer’s App Library can include those providers without the consumer having a directory entry of its own. ExtraBar consumes DockFlow’s contract; DockFlow supplies the public integration guide. A dual-role app can publish a guide for the contract it supplies.
+
 **Incoming access is generic.** A provider defines its contract and binds handlers once. Any compatible consumer can request access during explicit pairing mode. Do not hardcode ExtraBar, or any other consumer, in provider consent copy, permission cards or callback routing just because it was the first integration. A user-defined connection label describes a grant, not a verified app identity. Each grant is separately revocable.
 
 For generic providers, omit `allowedCallbackBundleIDs` in `DiscoverablePairingHost.start` and `EndpointResolver.reply`. This default is available in `0.1.0-beta.2`; the earlier `0.1.0-beta.1` requires an explicit list. Upgrade both call sites together to `0.1.0-beta.2` or later. An optional explicit list can constrain a deliberately closed provider, but remains routing policy rather than authentication. Do not construct a purported trusted allowlist from a request's callback field.
@@ -61,6 +63,8 @@ For the current examples:
 
 Use a small text status with an optional icon. Color, arrows or green dots alone cannot convey direction or state. Do not map provider `IntegrationStatus.ready` to “Online”: it describes a usable saved record. Do not show “Verified app” based on a name, icon, bundle ID, callback or contract match.
 
+For consumers, observe transport termination even with a read-only grant. One task iterating `TalkClient.events` can detect closure without sending a subscription or polling; only subscribe and decode updates with the required scope. Guard callbacks by session generation so an old session cannot change a newer row. Explicit Disconnect and remote closure must update both headline and detail while retaining the saved-access distinction.
+
 ## Setup and consent
 
 1. From the outgoing App Library, **Set Up** explains which provider to open and which capability the feature needs. Do not trigger actions while browsing.
@@ -74,6 +78,8 @@ Use plain descriptions such as “Read presets” and “Apply presets.” Keep 
 
 Never display a newly requested name as OS-verified identity. Prefer a neutral heading such as “Allow this app to use DockFlow?” with the routing label in a secondary disclosure and clear code-comparison instructions. Preserve the same honesty in saved connection labels.
 
+Treat the setup countdown as a deadline, not proof of readiness. In beta.2, the host consumes its single attempt before listener/TLS setup and has no structured setup-failure callback. Keep Cancel available and distinguish waiting for a connection from an attempt in progress. A timeout may need explicit cancellation, a fresh provider mode and fresh discovery; do not automatically reuse the candidate or claim that no access was saved.
+
 ## Connection management and recovery
 
 - **Connect** uses the saved grant. Closing a live consumer session does not remove permission. Do not call that action Revoke.
@@ -85,6 +91,8 @@ Never display a newly requested name as OS-verified identity. Prefer a neutral h
 - Keep pairing and connection state in an app-owned service rather than a transient settings view. Cancel view-owned discovery work on dismissal; do not accidentally destroy persistent authorization or a legitimate feature-owned session when switching panes.
 
 Explain the consequence in the confirmation for revocation or forgetting, name the selected grant, and keep other grants untouched. Routine refreshes, reads and saved reconnect do not need an extra confirmation.
+
+Choose recovery text by operation. Discovery runs no provider action; denial before approval creates no grant to edit. Pairing timeout or disconnection may leave provider-only access, so direct the user to inspect it before retrying. A connection failure after a read does not imply a mutation ran. Reserve uncertain-action wording for a mutation that might have been delivered, and avoid repeating the same error in both status and detail.
 
 ## Native design and accessibility
 
