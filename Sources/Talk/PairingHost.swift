@@ -17,13 +17,19 @@ public actor PairingHost {
     deinit { acceptTask?.cancel(); expiryTask?.cancel(); worker?.cancel() }
 
     public func start(providerBundleID: String, lifetime: Double = 300, approve: @escaping Approve) async throws -> PairingInvitation {
+        try await start(providerBundleID: providerBundleID, credential: PairingCredential(), lifetime: lifetime, approve: approve)
+    }
+
+    func start(providerBundleID: String, credential: PairingCredential, lifetime: Double, approve: @escaping Approve) async throws -> PairingInvitation {
         guard !started else { throw TalkError.busy }
-        started = true
         guard lifetime.isFinite, lifetime > 0, lifetime <= 300 else { throw TalkError.invalidInvitation }
-        let credential = try PairingCredential()
-        let (port, connections) = try await listener.start(credential: credential)
+        started = true
         expiresAt = Date().addingTimeInterval(lifetime)
-        consumed = false
+        let (port, connections) = try await listener.start(credential: credential)
+        guard !consumed, Date() < expiresAt, !Task.isCancelled else {
+            await listener.stop()
+            throw TalkError.invitationExpired
+        }
         acceptTask = Task { [weak self] in
             for await peer in connections { await self?.accept(peer, approve: approve) }
         }
@@ -90,5 +96,5 @@ public actor PairingHost {
         return true
     }
 
-    private func finished() { connection = nil; worker = nil }
+    private func finished() async { await stop() }
 }

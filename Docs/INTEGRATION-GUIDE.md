@@ -80,6 +80,8 @@ TalkServer validates the contract/action mapping at start, checks the negotiated
 
 ## Pair and obtain scoped consent
 
+For pairing without clipboard transfer, use `DiscoverablePairingHost` and `PairingDiscovery`: [Start Pairing → Discover → Connect](DISCOVERABLE-PAIRING.md). Require comparison of the entire verification code in the provider consent UI. Existing saved records and reconnect behavior are unchanged. The native examples below retain manual invitations as an alternative.
+
 StudioModel demonstrates the full consent flow. `PairingHost.start(providerBundleID:approve:)` creates a five-minute, one-use invitation. Only its approval closure may create a durable PairingRecord after visible provider consent. The record contains a fresh `PairingCredential`, the endpoint bundle hint, and exactly the approved scopes; call `provider.approve(record)` and return the record from the closure. Keep the host alive until completion/expiry, and stop it on cancellation. PairingHost cancels its approval closure if the consumer disconnects.
 
 Transfer the code directly into Automator's SecureField. Do not print it, put it in a URL, take a screenshot of it, or persist the invitation. `PairingClient.pair(using:)` returns a separately keyed durable record; save it with the consumer's IntegrationStore. Never infer a verified publisher from the displayed name, bundle ID or claimed Team ID. Persistent consent authenticates possession of the paired key.

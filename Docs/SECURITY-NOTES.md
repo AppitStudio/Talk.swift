@@ -8,6 +8,8 @@ Network.framework provides TLS 1.3 mutual authentication over numeric IPv4 loopb
 
 A one-use invitation, valid for at most five minutes at the provider, establishes an encrypted setup connection. It carries a temporary credential, separate from the durable grant. The provider must obtain explicit scoped consent. Possession of a live invitation permits an attempt to pair; transfer it directly to the intended app and never log it. Disconnect cancels pending consent. Scope expansion creates a new consented credential replacing the selected grant.
 
+Discoverable pairing adds an explicit, expiring mode and ephemeral X25519 key agreement over untrusted public URL hints. Compare the full verification code in both apps before approving scopes; setup TLS alone cannot authenticate the discovery hints. The mode admits one valid exchange and never automatically reopens. See the [protocol and trust boundary](DISCOVERABLE-PAIRING.md#protocol-and-trust-boundary), including resource limits and denial-of-service boundaries.
+
 Every call is checked against persistent scopes, negotiated capabilities and declared input types before dispatch. Results/events are validated before delivery. Provider handlers remain responsible for domain rules and cancellation checks before side effects. A timeout/disconnect cannot prove rollback and never triggers an automatic mutation retry.
 
 ## Resource limits

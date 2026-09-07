@@ -13,7 +13,7 @@ Talk is beta software and still needs more testing and validation. State this in
 
 Inspect the host's instructions, project/package configuration, app lifecycle, signing and sandbox settings, and existing integration code. Locate the user's Talk SDK checkout or resolved package source; refer to it as `TALK_SDK_ROOT` in commands. Do not assume this skill is installed inside the SDK. If needed, request its local location while inspecting the host.
 
-Read the SDK's `Package.swift`, `Docs/INSTALLATION.md`, `Docs/INTEGRATION-GUIDE.md`, `Docs/CONTRACTS.md`, and relevant `Sources/Talk` APIs. Check `Docs/BETA-READINESS.md` for qualification limits; do not copy historical test counts into a new app's results. This skill targets the 6 September 2026 development preview: Swift tools 6.2, declared macOS 12.4 minimum, explicit pairing and the sole data-protection Keychain backend. If the checked-out APIs differ, adapt against that source and record the difference.
+Read the SDK's `Package.swift`, `Docs/INSTALLATION.md`, `Docs/INTEGRATION-GUIDE.md`, `Docs/CONTRACTS.md`, and relevant `Sources/Talk` APIs. Check `Docs/BETA-READINESS.md` for qualification limits; do not copy historical test counts into a new app's results. This skill covers beta `0.1.0-beta.1`: Swift tools 6.2, declared macOS 12.4 minimum, explicit pairing and the sole data-protection Keychain backend. If the checked-out APIs differ, adapt against that source and record the difference.
 
 Determine which app exposes actions (provider), which calls them (consumer), their bundle IDs, the actual automation trigger, expected data/side effects, scopes, and whether live events are needed. For consumer-only work, use the provider's supplied contract; do not invent action IDs. An app can play both roles, with separate provider and consumer archives. Ask only for consequential details not supplied by code or user; continue independent setup work.
 
@@ -27,6 +27,7 @@ Determine which app exposes actions (provider), which calls them (consumer), the
 ## SDK invariants
 
 - Persist through `IntegrationStore(persistence: CredentialStore(service: ...))`. Each app uses its own signed application-identifier access group. One store owns a service's whole archive; do not race writers across scenes, helpers or processes. Provider and consumer roles in one app should use distinct stable services.
+- Prefer `DiscoverablePairingHost` / `PairingDiscovery` for Start Pairing → Discover → Connect; read `Docs/DISCOVERABLE-PAIRING.md`. Require explicit comparison of the entire code before provider approval; no auto-accept or publisher claims. Route setup URLs alongside saved endpoint URLs, freeze scopes per mode, cancel owned tasks, and never start pairing on launch or in response to discovery alone. Manual invitations remain supported.
 - First provider consent grants exactly selected scopes. Subsequent permitted automation uses saved consent without prompts. Scope replacement requires fresh consent and a fresh credential, never an in-place scope edit.
 - Names, bundle IDs, discovery metadata and callbacks are untrusted hints. Paired TLS proves possession of a key, not another app's publisher identity.
 - Never put invitations or records in URLs, logs, UserDefaults, fixtures, screenshots, telemetry or source. Transfer codes directly through protected app input. Record stable errors and synthetic observations instead of credential data.
@@ -36,6 +37,6 @@ Determine which app exposes actions (provider), which calls them (consumer), the
 
 ## Scope and completion
 
-The canonical repository is `https://github.com/AppitStudio/Talk.swift.git`. Follow the host's remote dependency pin or local checkout preference; use the SDK installation guide for the `talk.swift` remote package identity. No stable release tag is declared by this skill. Do not invent a tag or distribution qualification. Integration work does not authorize publication, changing accounts, identities, profiles, system trust or Keychain policy. Use existing authorized signing configuration; continue code/build work if signing needs user action.
+The canonical repository is `https://github.com/AppitStudio/Talk.swift.git`. Follow the host's remote dependency pin or local checkout preference; use the SDK installation guide for the `talk.swift` remote package identity. The discoverable pairing prerelease is `0.1.0-beta.1`; pin it exactly when adopting this flow. It does not establish distribution qualification. Integration work does not authorize publication, changing accounts, identities, profiles, system trust or Keychain policy. Use existing authorized signing configuration; continue code/build work if signing needs user action.
 
 Deliver the changes, how to invoke the automation, the contract/scopes, validation evidence and remaining gaps. Update host task/handoff files when required. Never claim real-app success from SDK example results or a static checker.

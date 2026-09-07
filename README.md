@@ -13,6 +13,7 @@ The declared runtime minimum is **macOS 12.4**; actual Monterey runtime validati
 ## What you get
 
 - **Typed contracts:** declare actions, scopes, DTOs, and events in JSON; generate Swift clients with the included SwiftPM plugin.
+- **Discoverable pairing:** Start Pairing → Discover → Connect, with a matching code and visible approval. No clipboard transfer; key exchange is available only in pairing mode. See [the integration flow](Docs/DISCOVERABLE-PAIRING.md).
 - **Explicit permissions:** first-use provider consent, independent saved grants, permission replacement, and per-integration revocation.
 - **Local transport:** TLS 1.3 with paired-key authentication over loopback, using Apple frameworks. No cloud service, shared daemon, or third-party runtime dependencies.
 - **Protected credentials:** each app stores its own grants in its app-specific data-protection Keychain group.
@@ -31,7 +32,7 @@ Pairing proves possession of the paired credential. Displayed app names and bund
 
 Requires **Swift 6.2+** and a compatible macOS toolchain. The tested toolchain is Xcode 26.2 / Swift 6.2.3. Saved pairing requires correctly Apple-signed and provisioned app targets; an unsigned command-line build alone cannot validate persistence.
 
-In Xcode, add this package URL, select the `main` branch, and link the **Talk** product to each participating app:
+In Xcode, add this package URL, select the exact beta version `0.1.0-beta.1`, and link the **Talk** product to each participating app:
 
 ```text
 https://github.com/AppitStudio/Talk.swift.git
@@ -41,11 +42,11 @@ For a Swift package:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/AppitStudio/Talk.swift.git", branch: "main")
+    .package(url: "https://github.com/AppitStudio/Talk.swift.git", exact: "0.1.0-beta.1")
 ]
 ```
 
-Then add `.product(name: "Talk", package: "talk.swift")` to your target's dependencies and `import Talk`. There is no tagged stable release yet; pin a reviewed commit for reproducible integration work.
+Then add `.product(name: "Talk", package: "talk.swift")` to your target's dependencies and `import Talk`. This tag is a prerelease; pin it exactly for reproducible integration work.
 
 The [installation guide](Docs/INSTALLATION.md) covers a complete package manifest, local development, signing, sandbox capabilities, and generated contract targets.
 
@@ -62,6 +63,7 @@ Start with the [end-to-end integration guide](Docs/INTEGRATION-GUIDE.md). It inc
 | Guide | Use it for |
 | --- | --- |
 | [Installation](Docs/INSTALLATION.md) | Xcode / SwiftPM setup, signing, and sandbox requirements |
+| [Discoverable pairing](Docs/DISCOVERABLE-PAIRING.md) | Pairing mode, discovery, code verification and consent |
 | [Integration](Docs/INTEGRATION-GUIDE.md) | Provider handlers, pairing, clients, events, and lifecycle |
 | [Contracts](Docs/CONTRACTS.md) | Supported types, code generation, and directional compatibility |
 | [Example apps](Docs/EXAMPLES.md) | Build and pair Talk Studio and Talk Automator |

@@ -22,7 +22,7 @@ args = parser.parse_args()
 folders = ['Sources', 'Tests', 'Examples', 'Plugins', 'Scripts', 'Skills']
 root_files = ['Package.swift', 'README.md', 'SECURITY.md', 'CONTRIBUTING.md', '.gitignore', '.gitattributes']
 doc_files = [
-    'INSTALLATION.md', 'INTEGRATION-GUIDE.md', 'EXAMPLES.md', 'LLM-INTEGRATION.md',
+    'DISCOVERABLE-PAIRING.md', 'INSTALLATION.md', 'INTEGRATION-GUIDE.md', 'EXAMPLES.md', 'LLM-INTEGRATION.md',
     'CONTRACTS.md', 'CREDENTIAL-LIFECYCLE.md', 'SECURITY-NOTES.md',
     'BETA-READINESS.md', 'QUALIFICATION.md', 'LOCAL-HARDENING.md',
     'READINESS-VALIDATION.md', 'PROCESS-VALIDATION.md',

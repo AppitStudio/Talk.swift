@@ -6,6 +6,7 @@ public actor TalkListener {
     private var incoming: AsyncStream<TalkConnection>.Continuation?
 
     public init() {}
+    deinit { listener?.cancel(); incoming?.finish() }
 
     public func start(credential: PairingCredential) async throws -> (UInt16, AsyncStream<TalkConnection>) {
         guard listener == nil else { throw TalkError.busy }

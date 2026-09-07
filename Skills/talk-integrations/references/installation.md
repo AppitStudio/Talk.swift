@@ -4,7 +4,7 @@
 
 Set `TALK_SDK_ROOT` to the actual checkout in the invoking shell. Check its `Package.swift`: the current toolchain floor is Swift 6.2, with declared macOS 12.4 deployment support. Use the host's supported Xcode toolchain and Swift 6 concurrency checking for new integration code. Compare default actor isolation across targets; keep generated DTOs in a nonisolated module.
 
-For Xcode, add `https://github.com/AppitStudio/Talk.swift.git` at a reviewed commit or the preview `main` branch, or use the SDK directory as a local package. Link `Talk` to each participating app. Add a shared contract library to both apps. Preserve existing configurations and entitlements. The SDK's `StudioContract` is demo-specific; real integrations get their own contract.
+For Xcode, add `https://github.com/AppitStudio/Talk.swift.git` at exact beta version `0.1.0-beta.1` or a reviewed commit, or use the SDK directory as a local package. Link `Talk` to each participating app. Add a shared contract library to both apps. Preserve existing configurations and entitlements. The SDK's `StudioContract` is demo-specific; real integrations get their own contract.
 
 The SDK's `Docs/INSTALLATION.md` contains a complete remote SwiftPM manifest using `package: "talk.swift"`. Match the SDK source and skill revisions; do not assume a released version exists.
 

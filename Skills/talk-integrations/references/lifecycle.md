@@ -1,3 +1,7 @@
+## Discoverable pairing (preferred)
+
+Read the SDK’s `Docs/DISCOVERABLE-PAIRING.md` and use the `DiscoverablePairingHost` / `PairingDiscovery` APIs in beta `0.1.0-beta.1`. Pairing starts only on provider user intent, with frozen scopes. Discover and Connect are separate consumer actions. Display the full verification code in both apps and require confirmation that it matches before the provider grants scopes. Route setup URLs alongside endpoint resolution, keep hosts/tasks alive through response delivery, and cancel on shutdown. Existing records/storage services remain unchanged. The manual-invitation workflow below remains an alternative.
+
 # Provider and consumer lifecycle
 
 Use the checked-out SDK examples for complete UI/lifecycle wiring: `Examples/Studio/Sources/StudioModel.swift`, both app delegates, `Examples/Automator/Sources/AutomatorModel.swift` and `AutomatorSession.swift`. Adapt them; do not copy their bundle IDs, domain or signing configuration. The skill's starter assets are compilable integration primitives, not finished apps or an automatic consent UI.

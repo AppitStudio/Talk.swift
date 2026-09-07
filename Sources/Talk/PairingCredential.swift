@@ -17,6 +17,12 @@ public struct PairingCredential: Codable, Sendable, Equatable, CustomStringConve
         secret = Data(bytes)
     }
 
+    init(id: UUID, secret: Data) throws {
+        self.id = id
+        self.secret = secret
+        try validate()
+    }
+
     public func validate() throws {
         guard secret.count == 32 else { throw TalkError.invalidInvitation }
     }

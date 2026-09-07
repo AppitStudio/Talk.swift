@@ -62,3 +62,5 @@ Classify unavailable fault injection as NOT RUN or BLOCKED, not a pass. Sleep/wa
 ## Report evidence
 
 For each relevant scenario record `PASS`, `FAIL`, `BLOCKED`, or `NOT RUN`, plus the build/configuration, steps, observed result and redacted local evidence location. Keep the exact failure if a later run passes. Summarize which user trigger works, which scopes were exercised, whether persistence/revocation were proved, and what remains unverified. A bundle preflight PASS with runtime NOT RUN is an incomplete integration validation.
+
+For discoverable pairing, also verify: no discovery/key exchange outside pairing mode; matching full codes; approval disabled until comparison; denial and Cancel on either side dismiss consent; expiry/one-attempt use; restart requires a fresh mode; duplicates rejected; saved grants reconnect with pairing mode off. No private keys, setup secrets or durable credentials may appear in URLs, logs or the clipboard.
