@@ -5,10 +5,11 @@ Build a feature against an app's public Talk contract without access to its sour
 | App | Public contract | Guide |
 | --- | --- | --- |
 | DockFlow | List/read/apply presets; observe changes | [DockFlow](dockflow/GUIDE.md) |
+| ExtraDock (4 and 5) | List docks with visibility/metadata; show, hide, toggle or release docks; observe changes | [ExtraDock](extradock/GUIDE.md) |
 
 Read a provider guide to implement calls to that app. Apps that only consume Talk APIs do not publish an entry here; for example, ExtraBar uses the DockFlow guide. An app that both supplies and consumes actions may publish a guide for its own public contract. These are documentation entries, not an app store, publisher verification service or SDK runtime registry. A listing grants neither installation trust nor permissions.
 
-DockFlow's [public contract package](dockflow/Contract/Package.swift) and [consumer recipe](dockflow/Examples/DockFlowRecipe.swift) are sufficient to generate and compile a typed integration without private app code. Generic provider routing is available in Talk `0.1.0-beta.2`; consult the guide's app-version prerequisites before relying on a shipping app build. Talk remains beta; see [readiness](../Docs/BETA-READINESS.md).
+DockFlow's [public contract package](dockflow/Contract/Package.swift) and [consumer recipe](dockflow/Examples/DockFlowRecipe.swift), and ExtraDock's [public contract package](extradock/Contract/Package.swift) and [consumer recipe](extradock/Examples/ExtraDockRecipe.swift), are sufficient to generate and compile a typed integration without private app code. ExtraDock 4 and ExtraDock 5 are two apps with different bundle IDs that publish one shared contract; DockFlow consumes it and is also a provider of its own contract. Generic provider routing is available in Talk `0.1.0-beta.2`; consult the guide's app-version prerequisites before relying on a shipping app build. Talk remains beta; see [readiness](../Docs/BETA-READINESS.md).
 
 For coding agents, load the public [Talk integration skill](../Skills/talk-integrations/SKILL.md), then the selected provider guide and its linked JSON. Preserve wire IDs and scopes. Discovery metadata cannot replace the reviewed contract. Implement a real feature before adding an app to your product's outgoing library.
 

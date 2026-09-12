@@ -92,7 +92,7 @@ Give users one **Talk Integrations** settings destination with **Apps I control*
 | [Discoverable pairing](Docs/DISCOVERABLE-PAIRING.md) | Pairing mode, discovery, code verification and consent |
 | [Integration](Docs/INTEGRATION-GUIDE.md) | Provider handlers, pairing, clients, events, and lifecycle |
 | [Integration UX](Docs/INTEGRATION-UX.md) | Two directions, App Library, consent, statuses and access management |
-| [Provider integration guides](Integrations/README.md) | Call apps such as DockFlow using their public contracts |
+| [Provider integration guides](Integrations/README.md) | Call apps such as DockFlow or ExtraDock using their public contracts |
 | [Publish an app guide](Docs/INTEGRATION-GUIDE-AUTHORING.md) | One template, deterministic scaffolding and validation |
 | [Contracts](Docs/CONTRACTS.md) | Supported types, code generation, and directional compatibility |
 | [Example apps](Docs/EXAMPLES.md) | Build and pair Talk Studio and Talk Automator |

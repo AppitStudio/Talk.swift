@@ -45,32 +45,39 @@ try:
     run([sys.executable, ROOT / 'Scripts/integration-guides.py', 'check', '--tools-dir', tools],
         'public-guides-schema-and-reference-check')
 
-    source = ROOT / 'Integrations/dockflow/Contract'
-    contract = output / 'DockFlowTalkContract'
-    shutil.copytree(source, contract)
-    manifest = contract / 'Package.swift'
-    manifest.write_text(manifest.read_text().replace(
-        '.package(url: "https://github.com/AppitStudio/Talk.swift.git", exact: "0.1.0-beta.2")',
-        '.package(name: "talk.swift", path: "../SDK")'))
-    consumer = output / 'Consumer'
-    (consumer / 'Sources/Consumer').mkdir(parents=True)
-    (consumer / 'Package.swift').write_text('''// swift-tools-version: 6.2
+    def build_outsider(slug, module, recipe_name, check_name):
+        """Compile an isolated consumer from one provider's public package and exact recipe."""
+        contract = output / module
+        shutil.copytree(ROOT / 'Integrations' / slug / 'Contract', contract)
+        manifest = contract / 'Package.swift'
+        manifest.write_text(manifest.read_text().replace(
+            '.package(url: "https://github.com/AppitStudio/Talk.swift.git", exact: "0.1.0-beta.2")',
+            '.package(name: "talk.swift", path: "../SDK")'))
+        consumer = output / ('Consumer-' + slug)
+        (consumer / 'Sources/Consumer').mkdir(parents=True)
+        (consumer / 'Package.swift').write_text(f'''// swift-tools-version: 6.2
 import PackageDescription
 let package = Package(
     name: "OutsiderConsumer",
     platforms: [.macOS("12.4")],
     products: [.library(name: "Consumer", targets: ["Consumer"])],
     dependencies: [.package(name: "talk.swift", path: "../SDK"),
-                   .package(path: "../DockFlowTalkContract")],
+                   .package(path: "../{module}")],
     targets: [.target(name: "Consumer", dependencies: [
         .product(name: "Talk", package: "talk.swift"),
-        .product(name: "DockFlowTalkContract", package: "DockFlowTalkContract")])],
+        .product(name: "{module}", package: "{module}")])],
     swiftLanguageModes: [.v6]
 )
 ''')
-    recipe = ROOT / 'Integrations/dockflow/Examples/DockFlowRecipe.swift'
-    shutil.copy2(recipe, consumer / 'Sources/Consumer/DockFlowRecipe.swift')
-    run(['swift', 'build', '--package-path', consumer], 'outsider-plugin-and-exact-recipe-build')
+        recipe = ROOT / 'Integrations' / slug / 'Examples' / recipe_name
+        shutil.copy2(recipe, consumer / 'Sources/Consumer' / recipe_name)
+        run(['swift', 'build', '--package-path', consumer], check_name)
+
+    # Each published provider gets its own exact minimal consumer build.
+    build_outsider('dockflow', 'DockFlowTalkContract', 'DockFlowRecipe.swift',
+                   'outsider-plugin-and-exact-recipe-build')
+    build_outsider('extradock', 'ExtraDockTalkContract', 'ExtraDockRecipe.swift',
+                   'outsider-extradock-plugin-and-exact-recipe-build')
 
     # The CLI runs against an isolated guide checkout for mutation/negative controls.
     fixture = output / 'GuideCheckout'
@@ -78,7 +85,7 @@ let package = Package(
     shutil.copy2(ROOT / 'Scripts/integration-guides.py', fixture / 'Scripts/integration-guides.py')
     for name in ('Integrations', 'Docs', 'Skills'):
         shutil.copytree(ROOT / name, fixture / name)
-    for name in ('CONTRIBUTING.md', 'SECURITY.md'):
+    for name in ('CONTRIBUTING.md', 'SECURITY.md', 'LICENSE'):
         shutil.copy2(ROOT / name, fixture / name)
     cli = fixture / 'Scripts/integration-guides.py'
     canonical = fixture / 'Integrations/dockflow/Contract/Sources/DockFlowTalkContract/Contract.talk.json'

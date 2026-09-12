@@ -1,0 +1,244 @@
+{
+  "actions" : [
+    {
+      "id" : "extradock.docks.read",
+      "input" : "Void",
+      "method" : "snapshot",
+      "mutation" : false,
+      "output" : "ExtraDocksSnapshot",
+      "scope" : "extradock.docks.read",
+      "symbol" : "read"
+    },
+    {
+      "id" : "extradock.docks.visibility",
+      "input" : "SetDockVisibilityRequest",
+      "method" : "setVisibility",
+      "mutation" : true,
+      "output" : "SetDockVisibilityResult",
+      "scope" : "extradock.docks.control",
+      "symbol" : "setVisibility"
+    },
+    {
+      "id" : "extradock.docks.observe",
+      "input" : "Void",
+      "method" : "subscribe",
+      "mutation" : false,
+      "output" : "ExtraDocksSnapshot",
+      "scope" : "extradock.docks.observe",
+      "symbol" : "observe"
+    }
+  ],
+  "contractID" : "com.appit.extradock.docks",
+  "contractVersion" : "1.0.0",
+  "events" : [
+    {
+      "id" : "extradock.docks.changed",
+      "payload" : "ExtraDocksSnapshot",
+      "symbol" : "changed"
+    }
+  ],
+  "name" : "ExtraDockDocks",
+  "schemaVersion" : 1,
+  "types" : [
+    {
+      "cases" : [
+        "extraDock4",
+        "extraDock5"
+      ],
+      "kind" : "enum",
+      "name" : "ExtraDockGeneration"
+    },
+    {
+      "cases" : [
+        "left",
+        "right",
+        "bottom",
+        "top"
+      ],
+      "kind" : "enum",
+      "name" : "ExtraDockPosition"
+    },
+    {
+      "cases" : [
+        "application",
+        "file",
+        "folder",
+        "widget",
+        "system"
+      ],
+      "kind" : "enum",
+      "name" : "ExtraDockItemKind"
+    },
+    {
+      "fields" : [
+        {
+          "name" : "id",
+          "type" : "UUID"
+        },
+        {
+          "name" : "name",
+          "type" : "String"
+        },
+        {
+          "name" : "kind",
+          "type" : "ExtraDockItemKind"
+        },
+        {
+          "name" : "bundleID",
+          "type" : "String?"
+        },
+        {
+          "name" : "path",
+          "type" : "String?"
+        },
+        {
+          "name" : "iconSymbolName",
+          "type" : "String?"
+        }
+      ],
+      "kind" : "struct",
+      "name" : "ExtraDockItemSummary"
+    },
+    {
+      "fields" : [
+        {
+          "name" : "id",
+          "type" : "UUID"
+        },
+        {
+          "name" : "name",
+          "type" : "String"
+        },
+        {
+          "name" : "isVisible",
+          "type" : "Bool"
+        },
+        {
+          "name" : "isEnabled",
+          "type" : "Bool"
+        },
+        {
+          "name" : "position",
+          "type" : "ExtraDockPosition?"
+        },
+        {
+          "name" : "itemCount",
+          "type" : "Int64"
+        },
+        {
+          "name" : "items",
+          "type" : "[ExtraDockItemSummary]"
+        }
+      ],
+      "kind" : "struct",
+      "name" : "ExtraDockSummary"
+    },
+    {
+      "fields" : [
+        {
+          "name" : "sessionID",
+          "type" : "UUID"
+        },
+        {
+          "name" : "revision",
+          "type" : "Int64"
+        },
+        {
+          "name" : "generation",
+          "type" : "ExtraDockGeneration"
+        },
+        {
+          "name" : "appVersion",
+          "type" : "String"
+        },
+        {
+          "name" : "docks",
+          "type" : "[ExtraDockSummary]"
+        }
+      ],
+      "kind" : "struct",
+      "name" : "ExtraDocksSnapshot"
+    },
+    {
+      "cases" : [
+        "show",
+        "hide",
+        "toggle",
+        "automatic"
+      ],
+      "kind" : "enum",
+      "name" : "DockVisibilityAction"
+    },
+    {
+      "fields" : [
+        {
+          "name" : "dockID",
+          "type" : "UUID"
+        },
+        {
+          "name" : "action",
+          "type" : "DockVisibilityAction"
+        }
+      ],
+      "kind" : "struct",
+      "name" : "DockVisibilityChange"
+    },
+    {
+      "fields" : [
+        {
+          "name" : "changes",
+          "type" : "[DockVisibilityChange]"
+        }
+      ],
+      "kind" : "struct",
+      "name" : "SetDockVisibilityRequest"
+    },
+    {
+      "cases" : [
+        "applied",
+        "notFound",
+        "disabled",
+        "unavailable",
+        "rejected"
+      ],
+      "kind" : "enum",
+      "name" : "DockVisibilityStatus"
+    },
+    {
+      "fields" : [
+        {
+          "name" : "dockID",
+          "type" : "UUID"
+        },
+        {
+          "name" : "status",
+          "type" : "DockVisibilityStatus"
+        },
+        {
+          "name" : "isVisible",
+          "type" : "Bool?"
+        },
+        {
+          "name" : "message",
+          "type" : "String?"
+        }
+      ],
+      "kind" : "struct",
+      "name" : "DockVisibilityOutcome"
+    },
+    {
+      "fields" : [
+        {
+          "name" : "revision",
+          "type" : "Int64"
+        },
+        {
+          "name" : "outcomes",
+          "type" : "[DockVisibilityOutcome]"
+        }
+      ],
+      "kind" : "struct",
+      "name" : "SetDockVisibilityResult"
+    }
+  ]
+}
