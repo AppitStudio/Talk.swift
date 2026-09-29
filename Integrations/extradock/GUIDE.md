@@ -6,8 +6,8 @@
   "formatVersion": 1,
   "app": "extradock",
   "displayName": "ExtraDock",
-  "guideVersion": "1.1.0",
-  "updated": "2026-09-14",
+  "guideVersion": "1.1.1",
+  "updated": "2026-09-29",
   "status": "beta",
   "roles": [
     "provider"
@@ -90,11 +90,13 @@ Outcomes: `notFound` means no dock has that ID; `disabled` (ExtraDock 5) means t
 
 Read-only pairing must work. Show visibility control and live updates as optional permissions and disable the associated features when absent. Generated `ExtraDockDocksAPI.actions[actionID]` gives the scope; the control action ID (`extradock.docks.visibility`) and its scope (`extradock.docks.control`) are deliberately different strings.
 
-## New integration library (unreleased)
+## Connection lifecycle
 
-The reviewed DockFlow / ExtraDock 5 integration adopts [automatic connections](../../Docs/AUTOMATIC-CONNECTIONS.md). Both apps must contain the new SDK APIs and advertise `TalkConnectionVersion = 1`; the published beta.2 package below does not include them. Discover supported installations passively, show the integration description and scopes, and use one Connect action. Preserve existing grants. Signed sender authentication replaces code comparison; pin the provider bundle and official signing team together. No shipping minimum version is assigned yet.
+### New integration library (unreleased)
 
-## Legacy connection lifecycle (beta.2)
+Following the approved DockFlow / ExtraDock 5 UI review, [automatic connections](../../Docs/AUTOMATIC-CONNECTIONS.md) are implemented for **DockFlow → ExtraDock 4 or ExtraDock 5**, alongside **ExtraBar → DockFlow** in the first-party integration library. Either app's integration entry can start setup; DockFlow receives the selected ExtraDock permissions in either case. Both participants must contain the new SDK APIs and advertise `TalkConnectionVersion = 1`; the published beta.2 package below does not include them. Discover supported installations passively, show the integration description and scopes, and use one Connect action. Preserve existing grants. Signed sender authentication replaces code comparison; pin each generation's bundle ID and official signing team together. DockFlow keeps grants separate and uses the explicitly selected ExtraDock generation for presets; an unavailable selected app does not silently redirect automation to the other generation. Known first-party peers use the app's constrained approval policy; other verified consumers still require visible scoped consent. Implementation and the approved first UI review do not establish completed native acceptance for the expanded rollout. No new SDK tag or shipping minimum app version is assigned yet; the public package and metadata retain their beta.2 baseline.
+
+### Legacy connection lifecycle (beta.2)
 
 1. Own one consumer `IntegrationStore(persistence: CredentialStore(service: ...))` with a stable service specific to your app's consumer role. Reload it at startup. Keep app-level pairing, resolver, session and event task ownership; closing Settings must not silently disable automation.
 2. From the user's single Connect action in your app, open ExtraDock's App Connections pane with the permissions pre-selected by sending `extradock://settings/talk?scopes=read,control,observe&requestedBy=<your app name>` to the chosen installation (`NSWorkspace.open(_:withApplicationAt:configuration:)`). Builds from ExtraDock 4.3.18 / 5.0.9 show an "An app wants to connect" card with Start Pairing; older builds ignore the link and merely come forward, so also tell the user where to find Settings → Integrations → App Connections. The link never starts pairing: the user presses Start Pairing in ExtraDock, which freezes the selected permissions for one attempt of at most five minutes. `requestedBy` is an untrusted routing hint ExtraDock uses only as the suggested connection label (control characters stripped, 64 characters maximum). While waiting, poll discovery for the intended generation with a bounded loop (each attempt times out after ten seconds; stop at five minutes or on the user's Cancel) and connect to the single answering candidate; two candidates need an explicit choice. Forward incoming setup URLs to `PairingDiscovery` and endpoint replies to `EndpointResolver`.

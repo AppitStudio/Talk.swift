@@ -6,8 +6,8 @@
   "formatVersion": 1,
   "app": "dockflow",
   "displayName": "DockFlow",
-  "guideVersion": "1.0.1",
-  "updated": "2026-09-07",
+  "guideVersion": "1.0.2",
+  "updated": "2026-09-29",
   "status": "beta",
   "roles": [
     "provider"
@@ -74,11 +74,13 @@ Read-only pairing must work. Show Apply and Live Updates as optional permissions
 
 An apply result of `accepted` means the request was admitted and background work was dispatched; it does **not** prove completion. Display Applying, then reconcile through snapshots/events. `cooldown` means another apply or the normal cooldown prevented admission; `notFound` means the preset disappeared; `rejected` currently includes normal license admission failure. Version 1 has no completion receipt or exactly-once guarantee. Do not replay a request after timeout, disconnect or cancellation.
 
-## New integration library (unreleased)
+## Connection lifecycle
 
-The reviewed DockFlow / ExtraDock 5 integration adopts [automatic connections](../../Docs/AUTOMATIC-CONNECTIONS.md). Both apps must contain the new SDK APIs and advertise `TalkConnectionVersion = 1`; the published beta.2 package below does not include them. Discover supported installations passively, show the integration description and scopes, and use one Connect action. Preserve existing grants. Signed sender authentication replaces code comparison; pin the provider bundle and official signing team together. No shipping minimum version is assigned yet.
+### New integration library (unreleased)
 
-## Legacy connection lifecycle (beta.2)
+Following the approved DockFlow / ExtraDock 5 UI review, [automatic connections](../../Docs/AUTOMATIC-CONNECTIONS.md) are implemented for **ExtraBar → DockFlow** and **DockFlow → ExtraDock 4 or ExtraDock 5**. Either app's integration entry can start setup; the arrow describes which app receives permission to use the other's contract, not which app opens the connection panel. Both participants must contain the new SDK APIs and advertise `TalkConnectionVersion = 1`; the published beta.2 package below does not include them. Discover supported installations passively, show the integration description and scopes, and use one Connect action. Preserve existing grants. Signed sender authentication replaces code comparison; pin the provider bundle and official signing team together. Known first-party peers use the app's constrained approval policy; other verified consumers still require visible scoped consent. Implementation and the approved first UI review do not establish completed native acceptance for the expanded rollout. No new SDK tag or shipping minimum app version is assigned yet; the public package and metadata retain their beta.2 baseline.
+
+### Legacy connection lifecycle (beta.2)
 
 1. Own one consumer `IntegrationStore(persistence: CredentialStore(service: ...))` with a stable service specific to your app's consumer role. Reload it at startup. Keep app-level pairing, resolver, session and event task ownership; closing Settings must not silently disable automation.
 2. In your app's DockFlow library entry, guide the user to DockFlow → Talk Integrations → Apps with access → Start Pairing. DockFlow freezes the selected permissions for one attempt, at most five minutes. In your app choose Discover, then Connect. Forward incoming setup URLs to `PairingDiscovery` and endpoint replies to `EndpointResolver`.
