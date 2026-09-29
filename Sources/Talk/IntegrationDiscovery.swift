@@ -22,10 +22,17 @@ public enum IntegrationDiscovery {
             FileManager.default.fileExists(atPath: $0.path)
                 && Bundle(url: $0)?.bundleIdentifier == identity.bundleID
         }
-        let urls = Set(candidates.map { $0.standardizedFileURL.resolvingSymlinksInPath() })
-        guard !urls.isEmpty else { return Installation(availability: .notInstalled, applicationURL: nil) }
-        guard urls.count == 1, let url = urls.first else {
+        let running = NSRunningApplication.runningApplications(withBundleIdentifier: identity.bundleID)
+        let url: URL
+        do {
+            url = try select(installed: candidates, running: running.map(\.bundleURL), canonicalDirectories: [
+                URL(fileURLWithPath: "/Applications", isDirectory: true),
+                FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications", isDirectory: true)
+            ])
+        } catch TalkError.ambiguousProvider {
             return Installation(availability: .ambiguousInstallation, applicationURL: nil)
+        } catch {
+            return Installation(availability: .notInstalled, applicationURL: nil)
         }
         let bundle = Bundle(url: url)
         let types = bundle?.object(forInfoDictionaryKey: "CFBundleURLTypes") as? [[String: Any]] ?? []
@@ -36,5 +43,26 @@ public enum IntegrationDiscovery {
         do { try AuthenticatedAppRouting.inspect(applicationURL: url, identity: identity) }
         catch { return Installation(availability: .unverified, applicationURL: url) }
         return Installation(availability: .available, applicationURL: url)
+    }
+
+    /// A running app is the user's selected copy. Otherwise prefer one normal
+    /// installation over dormant build/archive copies. Never choose between two
+    /// running or two canonical installations, and never fall back after a
+    /// selected copy fails signature/version validation.
+    static func select(installed: [URL], running: [URL?], canonicalDirectories: [URL]) throws -> URL {
+        func normalize(_ url: URL) -> URL { url.standardizedFileURL.resolvingSymlinksInPath() }
+        guard running.count <= 1 else { throw TalkError.ambiguousProvider }
+        if running.count == 1 {
+            guard let url = running[0] else { throw TalkError.unavailable }
+            return normalize(url)
+        }
+        let urls = Set(installed.map(normalize))
+        let roots = Set(canonicalDirectories.map(normalize))
+        let canonical = urls.filter { roots.contains($0.deletingLastPathComponent()) }
+        if canonical.count > 1 { throw TalkError.ambiguousProvider }
+        if let url = canonical.first { return url }
+        guard urls.count <= 1 else { throw TalkError.ambiguousProvider }
+        guard let url = urls.first else { throw TalkError.unavailable }
+        return url
     }
 }

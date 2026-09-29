@@ -33,8 +33,10 @@ let installation = IntegrationDiscovery.installation(for: identity, role: .provi
 Inspect on panel appearance and relevant workspace changes. The SDK reports
 `available`, `notInstalled`, `updateRequired`, `ambiguousInstallation`, or
 `unverified`, plus the installation URL when unambiguous. Discovery never launches
-the app. Duplicate installations require an explicit resolution; do not pick the
-first URL. The signature check during Connect is repeated, so metadata is never
+the app. The sole running copy is preferred, otherwise one installation directly in
+`/Applications` or `~/Applications`, otherwise one registered copy. Multiple
+running or canonical copies require resolution. Never silently switch away from
+a selected copy whose version or signature fails validation. The signature check during Connect is repeated, so metadata is never
 the trust boundary. Older installed apps should say **Update required**.
 
 Pin the exact bundle identifier **and** signing Team ID from an official provider
