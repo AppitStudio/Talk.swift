@@ -60,6 +60,12 @@ public actor TalkProvider {
         guard record.scopes.isSubset(of: Set(contract.actions.map(\.scope))) else { throw TalkError.permissionDenied }
         if let old = record.replacesID {
             guard let previous = statuses[old], previous.providerBundleID == record.providerBundleID else { throw TalkError.pairingRequired }
+            // Authenticate ownership before stopping anything. A caller cannot
+            // rotate a different consumer's grant, including an unidentified
+            // legacy grant, by presenting its UUID.
+            guard let saved = try await store.all().first(where: { $0.credential.id == old }),
+                  saved.consumerIdentity == record.consumerIdentity else { throw TalkError.permissionDenied }
+            guard running, generation == epoch else { throw TalkError.disconnected }
             await stopServer(old)
             statuses[old] = IntegrationStatus(id: old, label: previous.label, providerBundleID: previous.providerBundleID, scopes: previous.scopes, state: .revocationPending)
         }

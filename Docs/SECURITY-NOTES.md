@@ -1,5 +1,8 @@
 # Security model
 
+> **New connection flow (unreleased):** [Automatic connections](AUTOMATIC-CONNECTIONS.md) is the default for apps adopting this checkout: a passive integration library and one Connect action, with OS-verified sender authentication. The published `0.1.0-beta.2` tag and older examples below use legacy code-comparison pairing. Keep existing grants and storage services; both apps must adopt the new APIs before advertising `TalkConnectionVersion = 1`.
+
+
 Talk authenticates explicitly paired principals by possession of a high-entropy credential. It does not verify a peer's publisher from its claimed app name, bundle ID, PID or public key. Discovery, callback nonces and endpoint hints are untrusted routing data. TLS authenticates the connection independently of those hints.
 
 ## Transport and authorization

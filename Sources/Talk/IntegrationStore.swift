@@ -40,6 +40,7 @@ public actor IntegrationStore {
         guard !next.contains(where: { $0.credential.id == record.credential.id }) else { throw TalkError.busy }
         if let old = record.replacesID, let previous = next.first(where: { $0.credential.id == old }) {
             guard previous.providerBundleID == record.providerBundleID else { throw TalkError.permissionDenied }
+            guard previous.consumerIdentity == record.consumerIdentity else { throw TalkError.permissionDenied }
             next.removeAll { $0.credential.id == old }
         }
         next.append(record)

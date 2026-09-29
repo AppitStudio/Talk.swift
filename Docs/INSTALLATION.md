@@ -1,5 +1,8 @@
 # Install Talk.swift
 
+> **New connection flow (unreleased):** [Automatic connections](AUTOMATIC-CONNECTIONS.md) is the default for apps adopting this checkout: a passive integration library and one Connect action, with OS-verified sender authentication. The published `0.1.0-beta.2` tag and older examples below use legacy code-comparison pairing. Keep existing grants and storage services; both apps must adopt the new APIs before advertising `TalkConnectionVersion = 1`.
+
+
 Talk is a macOS Swift package. Both apps need the SDK; a provider exposes a contract, and a consumer uses a generated client for that contract. One app can do both.
 
 > **Beta — use with caution.** More testing and validation are required. Start with synthetic or noncritical data and test the complete flow in your actual signed apps. Installing or successfully compiling the package does not establish production readiness.
