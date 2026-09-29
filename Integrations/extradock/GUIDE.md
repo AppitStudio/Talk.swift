@@ -90,7 +90,11 @@ Outcomes: `notFound` means no dock has that ID; `disabled` (ExtraDock 5) means t
 
 Read-only pairing must work. Show visibility control and live updates as optional permissions and disable the associated features when absent. Generated `ExtraDockDocksAPI.actions[actionID]` gives the scope; the control action ID (`extradock.docks.visibility`) and its scope (`extradock.docks.control`) are deliberately different strings.
 
-## Connection lifecycle
+## New integration library (unreleased)
+
+The reviewed DockFlow / ExtraDock 5 integration adopts [automatic connections](../../Docs/AUTOMATIC-CONNECTIONS.md). Both apps must contain the new SDK APIs and advertise `TalkConnectionVersion = 1`; the published beta.2 package below does not include them. Discover supported installations passively, show the integration description and scopes, and use one Connect action. Preserve existing grants. Signed sender authentication replaces code comparison; pin the provider bundle and official signing team together. No shipping minimum version is assigned yet.
+
+## Legacy connection lifecycle (beta.2)
 
 1. Own one consumer `IntegrationStore(persistence: CredentialStore(service: ...))` with a stable service specific to your app's consumer role. Reload it at startup. Keep app-level pairing, resolver, session and event task ownership; closing Settings must not silently disable automation.
 2. From the user's single Connect action in your app, open ExtraDock's App Connections pane with the permissions pre-selected by sending `extradock://settings/talk?scopes=read,control,observe&requestedBy=<your app name>` to the chosen installation (`NSWorkspace.open(_:withApplicationAt:configuration:)`). Builds from ExtraDock 4.3.18 / 5.0.9 show an "An app wants to connect" card with Start Pairing; older builds ignore the link and merely come forward, so also tell the user where to find Settings → Integrations → App Connections. The link never starts pairing: the user presses Start Pairing in ExtraDock, which freezes the selected permissions for one attempt of at most five minutes. `requestedBy` is an untrusted routing hint ExtraDock uses only as the suggested connection label (control characters stripped, 64 characters maximum). While waiting, poll discovery for the intended generation with a bounded loop (each attempt times out after ten seconds; stop at five minutes or on the user's Cancel) and connect to the single answering candidate; two candidates need an explicit choice. Forward incoming setup URLs to `PairingDiscovery` and endpoint replies to `EndpointResolver`.

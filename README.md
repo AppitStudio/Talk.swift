@@ -2,7 +2,7 @@
 
 **Let your macOS apps work together.**
 
-Talk is a Swift SDK for app-to-app communication: expose typed actions and live events in one app, call them from another, and let users approve exactly what each integration can do. Pair once; subsequent permitted automation uses the saved grant.
+Talk is a Swift SDK for app-to-app communication: expose typed actions and live events in one app, call them from another, and let users approve exactly what each integration can do. Connect once; subsequent permitted automation uses the saved grant.
 
 Built for macOS developers adding integrations to their apps, and for coding agents helping implement them. A focus app can switch a workspace app's scene, a companion utility can query another app's state, or two apps can react to each other's changes.
 
@@ -25,7 +25,7 @@ The skill guides package setup, typed contracts, pairing UI, saved permissions a
 ## What you get
 
 - **Typed contracts:** declare actions, scopes, DTOs, and events in JSON; generate Swift clients with the included SwiftPM plugin.
-- **Discoverable pairing:** Start Pairing → Discover → Connect, with a matching code and visible approval. No clipboard transfer; key exchange is available only in pairing mode. See [the integration flow](Docs/DISCOVERABLE-PAIRING.md).
+- **Automatic connections:** open an integration library, choose an app, and Connect. Signed sender verification and key exchange run in the background. No pairing mode or comparison code. See [the new flow](Docs/AUTOMATIC-CONNECTIONS.md) and its revision requirements.
 - **Explicit permissions:** first-use provider consent, independent saved grants, permission replacement, and per-integration revocation.
 - **Local transport:** TLS 1.3 with paired-key authentication over loopback, using Apple frameworks. No cloud service, shared daemon, or third-party runtime dependencies.
 - **Protected credentials:** each app stores its own grants in its app-specific data-protection Keychain group.
@@ -39,16 +39,15 @@ flowchart LR
     User["User"] -->|"Approves scopes once"| Provider
 ```
 
-Pairing proves possession of the paired credential. Displayed app names and bundle IDs are routing hints, not verified publisher identities. Mutations are never automatically replayed after a timeout or disconnect; their outcome may be uncertain. Events are live delivery without durable replay. Read the [security model](Docs/SECURITY-NOTES.md) before designing your integration.
+Saved TLS sessions prove possession of the paired credential. New local setup additionally authenticates the OS-reported sender against its Apple-issued signature. Displayed names and discovery metadata remain hints; explicit provider policy determines authorization. Mutations are never automatically replayed after a timeout or disconnect; their outcome may be uncertain. Events are live delivery without durable replay. Read the [security model](Docs/SECURITY-NOTES.md) before designing your integration.
 
-## Pair without copying secrets
+## Connect from an integration library
 
-1. In the provider app, choose permissions and click **Start Pairing**. Pairing mode accepts one valid attempt and expires after at most five minutes.
-2. In the consumer app, click **Discover**, select the intended provider, then **Connect**. Discovery cannot turn on pairing in the other app.
-3. Compare the entire verification code in both apps. Confirm it matches in the provider’s consent UI, then approve the displayed permissions.
-4. Both apps save their own grant. Later permitted automation reconnects with pairing mode off and no new consent prompt.
+1. Open **Talk Integrations** to see the supported integrations and their installation status.
+2. Select an app to see what it does and the permissions it needs.
+3. Press **Connect**. Recognized integrations authenticate and save access in the background. Other authenticated apps use one scoped Allow prompt.
 
-Cancel or denial ends the attempt; retry starts with an explicit new pairing mode. Use `DiscoverablePairingHost` in the provider and `PairingDiscovery` in the consumer. The [pairing guide](Docs/DISCOVERABLE-PAIRING.md) covers ownership, callbacks and trust boundaries. Manual invitations remain supported; the Studio/Automator examples currently demonstrate that alternative.
+The new `IntegrationDiscovery`, `IntegrationConnection`, and `IntegrationConnectionHost` APIs are available in this checkout, not the published beta.2 tag. Read [automatic connections](Docs/AUTOMATIC-CONNECTIONS.md) for signed identity policies, synchronous URL capture, cancellation, and migration. Saved grants stay compatible. [Legacy code-comparison pairing](Docs/DISCOVERABLE-PAIRING.md) remains available for older consumers; the Studio/Automator examples demonstrate manual invitations.
 
 ## Install
 
@@ -75,8 +74,8 @@ The [installation guide](Docs/INSTALLATION.md) covers a complete package manifes
 ## Integrate two apps
 
 1. **Define a contract.** Give actions and events stable IDs, narrow permission scopes, and concrete DTOs. Generate the shared Swift contract/client module.
-2. **Implement the provider.** Bind actions to app behavior, restore saved grants at startup, and add Start Pairing with code comparison and visible scoped consent.
-3. **Implement the consumer.** Add Discover and Connect, display the comparison code, save the approved grant, and use the generated client from your app’s actual automation trigger.
+2. **Implement the provider.** Bind actions to app behavior, restore saved grants at startup, and retain an authenticated connection host with an explicit scoped approval policy.
+3. **Implement the consumer.** Add a passive integration library and a single Connect action, save the approved grant, and use the generated client from your app’s actual automation trigger.
 4. **Own the lifecycle.** Handle live events, disconnects, uncertain mutation outcomes, permission replacement, revocation, and protected-storage recovery.
 5. **Validate the signed apps.** Test permitted and denied operations, restart, cold launch, and durable revocation in your actual app pair.
 
@@ -89,7 +88,8 @@ Give users one **Talk Integrations** settings destination with **Apps I control*
 | Guide | Use it for |
 | --- | --- |
 | [Installation](Docs/INSTALLATION.md) | Xcode / SwiftPM setup, signing, and sandbox requirements |
-| [Discoverable pairing](Docs/DISCOVERABLE-PAIRING.md) | Pairing mode, discovery, code verification and consent |
+| [Automatic connections](Docs/AUTOMATIC-CONNECTIONS.md) | Integration library, signed sender verification, and background setup |
+| [Legacy pairing](Docs/DISCOVERABLE-PAIRING.md) | Compatibility with published beta.2 pairing |
 | [Integration](Docs/INTEGRATION-GUIDE.md) | Provider handlers, pairing, clients, events, and lifecycle |
 | [Integration UX](Docs/INTEGRATION-UX.md) | Two directions, App Library, consent, statuses and access management |
 | [Provider integration guides](Integrations/README.md) | Call apps such as DockFlow or ExtraDock using their public contracts |

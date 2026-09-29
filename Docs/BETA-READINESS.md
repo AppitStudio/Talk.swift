@@ -1,5 +1,8 @@
 # Beta readiness — 7 September 2026
 
+> **New connection flow (unreleased):** [Automatic connections](AUTOMATIC-CONNECTIONS.md) is the default for apps adopting this checkout: a passive integration library and one Connect action, with OS-verified sender authentication. The published `0.1.0-beta.2` tag and older examples below use legacy code-comparison pairing. Keep existing grants and storage services; both apps must adopt the new APIs before advertising `TalkConnectionVersion = 1`.
+
+
 **Status: public development preview, not a stable release.** The native example matrix and expanded Apple Development storage checks passed on the tested Mac. Targeted discoverable pairing in locally Developer ID-signed DockFlow and ExtraBar also passed. Broader real-app coverage, unrelated-team/distribution/certificate-change qualification, independent review, and platform testing remain incomplete. Source publication does not mark those gates complete. See [current qualification](QUALIFICATION.md) for the measured scope and preserved inconclusive results.
 
 ## 0.1.0-beta.2

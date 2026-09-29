@@ -1,5 +1,8 @@
 # Integration settings and direction
 
+> For new integrations on this checkout, follow `Docs/AUTOMATIC-CONNECTIONS.md` and `Docs/INTEGRATION-UX.md` in the SDK. They replace manual setup UI with authenticated background connection. The code-comparison instructions below describe published beta.2 compatibility; do not reintroduce them into a new library. Existing protected-storage, cancellation, grant and mutation invariants still apply.
+
+
 For a settings/consent UX task, read the SDK's `Docs/INTEGRATION-UX.md`. Use a dedicated **Talk Integrations** destination and distinguish the directions in user terms:
 
 - **Apps I control:** the developer-defined outgoing app library. Each entry exists because this app implements a useful feature against that provider's documented contract. Discovery answers whether that provider is installed/available for setup; it does not create a supported feature for an arbitrary app.

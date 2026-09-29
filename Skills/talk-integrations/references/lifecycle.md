@@ -1,5 +1,8 @@
 # Provider and consumer lifecycle
 
+> For new integrations on this checkout, follow `Docs/AUTOMATIC-CONNECTIONS.md` and `Docs/INTEGRATION-UX.md` in the SDK. They replace manual setup UI with authenticated background connection. The code-comparison instructions below describe published beta.2 compatibility; do not reintroduce them into a new library. Existing protected-storage, cancellation, grant and mutation invariants still apply.
+
+
 Default to [discoverable pairing](pairing.md) for new app integrations. The checked-out SDK examples demonstrate manual pairing and reusable lifecycle wiring: `Examples/Studio/Sources/StudioModel.swift`, both app delegates, `Examples/Automator/Sources/AutomatorModel.swift` and `AutomatorSession.swift`. Adapt them; do not copy their bundle IDs, domain or signing configuration. The skill's starter assets are compilable integration primitives, not finished apps or an automatic consent UI.
 
 ## Provider startup and handlers

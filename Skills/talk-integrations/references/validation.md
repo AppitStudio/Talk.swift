@@ -1,5 +1,8 @@
 # Validation and troubleshooting
 
+> For new integrations on this checkout, follow `Docs/AUTOMATIC-CONNECTIONS.md` and `Docs/INTEGRATION-UX.md` in the SDK. They replace manual setup UI with authenticated background connection. The code-comparison instructions below describe published beta.2 compatibility; do not reintroduce them into a new library. Existing protected-storage, cancellation, grant and mutation invariants still apply.
+
+
 ## Build and static preflight
 
 Build the host's actual schemes/targets using its normal authorized local configuration. Typecheck generated clients and provider handlers, and run targeted domain/permission/lifecycle tests. For SDK changes run its applicable tests and contract pipeline. SDK tests alone are not evidence for host wiring.

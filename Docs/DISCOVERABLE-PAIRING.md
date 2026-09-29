@@ -1,5 +1,8 @@
 # Discoverable pairing
 
+> **New connection flow (unreleased):** [Automatic connections](AUTOMATIC-CONNECTIONS.md) is the default for apps adopting this checkout: a passive integration library and one Connect action, with OS-verified sender authentication. The published `0.1.0-beta.2` tag and older examples below use legacy code-comparison pairing. Keep existing grants and storage services; both apps must adopt the new APIs before advertising `TalkConnectionVersion = 1`.
+
+
 Discoverable pairing was introduced in **0.1.0-beta.1**; use **0.1.0-beta.2** for the generic callback default. Users can pair two local apps without copying a secret:
 
 1. In the provider, select permissions and click **Start Pairing**.

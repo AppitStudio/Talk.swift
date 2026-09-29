@@ -1,5 +1,8 @@
 # Integrating Talk into a macOS app
 
+> **New connection flow (unreleased):** [Automatic connections](AUTOMATIC-CONNECTIONS.md) is the default for apps adopting this checkout: a passive integration library and one Connect action, with OS-verified sender authentication. The published `0.1.0-beta.2` tag and older examples below use legacy code-comparison pairing. Keep existing grants and storage services; both apps must adopt the new APIs before advertising `TalkConnectionVersion = 1`.
+
+
 This guide follows the runnable Studio and Automator examples. It uses explicit pairing, synthetic data, macOS 12.4 APIs and Swift 6.2. Validate your actual platform/signing environment separately; see [qualification](QUALIFICATION.md) for measured Apple Development results and the remaining signing/platform qualification lanes. No daemon, cloud service, account, publisher authentication or automatic mutation retry is provided.
 
 Start with the [installation guide](INSTALLATION.md) for Xcode/SwiftPM dependencies, signing, and app capabilities.

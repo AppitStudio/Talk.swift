@@ -1,5 +1,8 @@
 # Discoverable pairing: Start Pairing → Discover → Connect
 
+> For new integrations on this checkout, follow `Docs/AUTOMATIC-CONNECTIONS.md` and `Docs/INTEGRATION-UX.md` in the SDK. They replace manual setup UI with authenticated background connection. The code-comparison instructions below describe published beta.2 compatibility; do not reintroduce them into a new library. Existing protected-storage, cancellation, grant and mutation invariants still apply.
+
+
 Use this as the default for new integrations on Talk `0.1.0-beta.2`. Manual invitations remain an explicit alternative; the native Studio/Automator examples still demonstrate that alternative. Read the SDK’s `Docs/DISCOVERABLE-PAIRING.md` for protocol details. The skill starter supplies approval, grant-save and saved-client primitives; the host app must add the pairing service and visible consent UI described here.
 
 ## App-owned state and routing
