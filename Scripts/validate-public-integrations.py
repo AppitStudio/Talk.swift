@@ -147,8 +147,8 @@ let package = Package(
     rejected('escaping-public-reference-rejected', lambda: guide.write_text(original + '\n[Outside](../../../private.txt)\n'))
     rejected('sdk-contract-package-pin-drift-rejected', lambda: guide.write_text(original.replace(
         '"version": "0.1.0-beta.2"', '"version": "0.1.0-beta.3"', 1)))
-    rejected('contract-version-drift-rejected', lambda: guide.write_text(original.replace(
-        '"contractVersion": "1.0.0"', '"contractVersion": "2.0.0"', 1)))
+    rejected('contract-version-drift-rejected', lambda: guide.write_text(re.sub(
+        r'"contractVersion": "[0-9.]+"', '"contractVersion": "9.0.0"', original, count=1)))
     def mutate_metadata(target, mutation):
         meta, text = guide_cli.metadata(target)
         mutation(meta)

@@ -6,8 +6,8 @@
   "formatVersion": 1,
   "app": "dockflow",
   "displayName": "DockFlow",
-  "guideVersion": "1.0.2",
-  "updated": "2026-09-29",
+  "guideVersion": "1.0.3",
+  "updated": "2026-10-26",
   "status": "beta",
   "roles": [
     "provider"
@@ -20,8 +20,8 @@
     "bundleID": "com.appit.DockFlow",
     "contract": "Contract/Sources/DockFlowTalkContract/Contract.talk.json",
     "contractID": "com.appit.dockflow.presets",
-    "contractVersion": "1.0.0",
-    "sha256": "d38910cce7211ea36a4b88bd73604c37f48ce4315b178878804c578c12311c17",
+    "contractVersion": "1.1.0",
+    "sha256": "0dee553137f51ee568f6d6e839e3c63aa06c3e876cf5d83d436675b13b7f1c1c",
     "module": "DockFlowTalkContract"
   },
   "consumes": []
@@ -30,7 +30,7 @@
 
 ## Purpose and roles
 
-DockFlow lets a paired app list available Dock presets, read the active preset, request a preset switch, and observe changes. A launcher, menu bar app, or automation tool can build its own feature against this documented contract. Its developer needs no DockFlow source, private shared models, product token, or access to DockFlow's repository.
+DockFlow lets a paired app list available Dock presets, read the active preset, request a preset switch, and observe changes. Since contract 1.1.0 it can also move the Dock back to the display DockFlow's Lock Dock keeps it on, and open DockFlow's Lock Dock settings. A launcher, menu bar app, or automation tool can build its own feature against this documented contract. Its developer needs no DockFlow source, private shared models, product token, or access to DockFlow's repository.
 
 DockFlow is the provider for this contract. Your app is the consumer. ExtraBar is one consumer example; it has no special API status. DockFlow does not need a new handler or a new UI section for each consumer. Supporting an additional provider in your own outgoing app library does require implementing that provider's documented features.
 
@@ -38,7 +38,7 @@ DockFlow is the provider for this contract. Your app is the consumer. ExtraBar i
 
 - Swift tools 6.2 and Swift 6. The Talk SDK and public consumer contract package target macOS 12.4, but the DockFlow provider app requires macOS 13.5. A working DockFlow integration therefore requires macOS 13.5 or later. The SDK’s actual macOS 12.4 runtime remains unverified; see [beta readiness](../../Docs/BETA-READINESS.md).
 - The public consumer package pins Talk `0.1.0-beta.2`. This SDK version introduces generalized callback routing for pairing and saved reconnect. Use a DockFlow build integrating that provider update; no minimum shipping DockFlow version for that app update has been assigned yet. Earlier ExtraBar-only DockFlow builds cannot be assumed to accept unrelated consumers. Confirm the provider's release notes before shipping your integration.
-- Install a DockFlow build exposing `com.appit.dockflow.presets` version `1.0.0`, and create test presets in its own UI. Applying presets requires DockFlow's normal license admission. Consumers never receive its license credentials.
+- Install a DockFlow build exposing `com.appit.dockflow.presets`, and create test presets in its own UI. Version `1.0.0` has the preset actions; `1.1.0` (DockFlow 1.89 and later) adds the two Lock Dock actions. See [Contract versions](#contract-versions). Applying presets requires DockFlow's normal license admission. Consumers never receive its license credentials.
 - Give your consumer its own bundle ID, Apple signing/provisioning and app-specific data-protection Keychain entitlement. Register `talk-spike-consumer`, route setup and endpoint URLs, and configure sandbox network permissions where needed. Follow [installation](../../Docs/INSTALLATION.md); ad-hoc command-line compilation does not establish a usable protected app.
 - User approval occurs in DockFlow. App names, bundle IDs and advertised contracts are routing/metadata hints, not verified publisher identity. Support one unambiguous installed/running target; ask users to resolve duplicates rather than picking one arbitrarily.
 
@@ -57,6 +57,7 @@ The [canonical JSON](Contract/Sources/DockFlowTalkContract/Contract.talk.json) i
 | `presets` | At most 200 entries in the current implementation. No pagination or truncation indicator exists in version 1; do not claim an exhaustive list above that bound. |
 | `ApplyPresetRequest.id` | UUID from the latest available snapshot. |
 | `ApplyPresetResult` | Structured outcome, optional display message and current snapshot. Use `outcome` for program logic; message text is not a stable code. |
+| `RelocateLockedDockResult` (1.1) | `outcome` (`RelocateLockedDockOutcome`) and an optional display message. Use `outcome` for program logic. |
 
 Frames remain bounded to 64 KiB including envelope. A 200-item count cap does not guarantee every set of unusually large names fits; treat oversize responses as failures, never as an empty library. This contract exposes no preset editing, app paths, DockFlow database access or arbitrary command execution.
 
@@ -67,12 +68,25 @@ Frames remain bounded to 64 KiB including envelope. A 200-item count cap does no
 | `dockflow.presets.read` | `snapshot()` | `dockflow.presets.read` | Read preset metadata and active state. No mutation. Required for this integration's basic feature. |
 | `dockflow.presets.apply` | `applyPreset(ApplyPresetRequest)` | `dockflow.presets.apply` | Request a switch to an existing preset using DockFlow's normal Dock mutation behavior. Changes the user's Dock configuration. Optional. |
 | `dockflow.presets.observe` | `subscribe()` | `dockflow.presets.observe` | Obtain an initial snapshot and authorize the live preset feed. No mutation. Optional. |
+| `dockflow.lockdock.relocate` (1.1) | `relocateLockedDock()` | `dockflow.presets.apply` | Move the Dock back to its Lock Dock display. Moves the pointer briefly and changes which display shows the Dock. Optional. |
+| `dockflow.lockdock.settings.open` (1.1) | `openLockDockSettings()` | `dockflow.presets.apply` | Open DockFlow's Settings on the Lock Dock pane. No data change. Optional. |
 
 Event `dockflow.presets.changed` carries `DockFlowPresetsSnapshot` and requires the observe subscription. It can expose the same preset metadata as a read. Events are coalesced (currently about 250 ms), ordered within a connection, and have no durable replay. After a gap, reconnect and resubscribe for a fresh snapshot.
 
-Read-only pairing must work. Show Apply and Live Updates as optional permissions, and disable associated features when absent. Generated `API.actions[actionID]` gives the scope; action identifiers are not generically interchangeable with scopes even though these spellings match.
+Read-only pairing must work. Show Apply and Live Updates as optional permissions, and disable associated features when absent. The Lock Dock actions deliberately reuse the apply scope, so existing apply grants cover them without fresh consent; describe the apply permission as switching presets and moving the Dock to its locked display. Generated `API.actions[actionID]` gives the scope; action identifiers are not generically interchangeable with scopes even though these spellings match.
 
 An apply result of `accepted` means the request was admitted and background work was dispatched; it does **not** prove completion. Display Applying, then reconcile through snapshots/events. `cooldown` means another apply or the normal cooldown prevented admission; `notFound` means the preset disappeared; `rejected` currently includes normal license admission failure. Version 1 has no completion receipt or exactly-once guarantee. Do not replay a request after timeout, disconnect or cancellation.
+
+`relocateLockedDock()` returns `moved` when the move started (it finishes about half a second later), `alreadyThere`, `lockDockOff` (Lock Dock is off in DockFlow), `needsAccessibility` (DockFlow lacks Accessibility access), `singleDisplay`, `displayMissing` (the locked display isn't connected), `busy` (a move is running, a repeat request came within 1.5 s, or a preset was just applied) or `rejected` (normal license admission failed). DockFlow shows no notification for these; your app presents the outcome. For `lockDockOff` and `needsAccessibility`, offer `openLockDockSettings()`. On macOS 14 and later, yield activation to DockFlow first so its window can come forward.
+
+### Contract versions
+
+| Contract | DockFlow | Adds |
+| --- | --- | --- |
+| `1.0.0` | up to 1.88 | Preset read, apply, observe and the changed event. |
+| `1.1.0` | 1.89+ | `dockflow.lockdock.relocate`, `dockflow.lockdock.settings.open`, `RelocateLockedDockOutcome`, `RelocateLockedDockResult`. Additive; no scope change. |
+
+A generated client requires its whole schema by default, and negotiated capabilities are fixed for the connection. Require only the actions your feature uses. To use the Lock Dock actions while still supporting older DockFlow builds, connect requiring them; if negotiation fails with `ContractDiagnostic`, reconnect without them and hide the Lock Dock feature. On such a session DockFlow answers the Lock Dock actions with `unsupportedVersion`. A 1.0.0 consumer keeps working with a 1.1.0 provider.
 
 ## Connection lifecycle
 
@@ -134,7 +148,7 @@ If either app later supports both roles, the two lists stay independent. A conne
 
 | Check | Evidence / limit |
 | --- | --- |
-| Public contract provenance | Copied from the provider's canonical export and compared with ExtraBar's pinned copy on 2026-09-07. Contract `1.0.0`; hash above. No private app source is needed to generate/use it. |
+| Public contract provenance | Copied from the provider's canonical export and compared with ExtraBar's pinned copy on 2026-10-26. Contract `1.1.0`; hash above. `TalkContractChecker` passes 1.0.0 client → 1.1.0 provider and reports the two missing Lock Dock actions for a full 1.1.0 client → 1.0.0 provider, which the fallback above handles. No private app source is needed to generate/use it. |
 | Public package and recipe | `Scripts/validate-public-integrations.py` generates/types/builds an isolated consumer using only public artifacts; local validation recorded in the SDK handoff. This is compile evidence, not installed-app evidence. |
 | Existing app pair | The prior local signed DockFlow/ExtraBar pair passed discovery, full-code consent, read-only snapshot, reconnect/restart/cold launch, revocation and test-grant cleanup on macOS 15.7.9 arm64. See [beta readiness](../../Docs/BETA-READINESS.md). |
 | Unrelated consumer | Generalized routing is available in Talk `0.1.0-beta.2`; no unrelated signed consumer end-to-end pass is claimed by this guide. Qualify your actual consumer with its own signing, consent and lifecycle. |

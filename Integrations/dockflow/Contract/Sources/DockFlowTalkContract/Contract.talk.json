@@ -26,10 +26,28 @@
       "output" : "DockFlowPresetsSnapshot",
       "scope" : "dockflow.presets.observe",
       "symbol" : "observe"
+    },
+    {
+      "id" : "dockflow.lockdock.relocate",
+      "input" : "Void",
+      "method" : "relocateLockedDock",
+      "mutation" : true,
+      "output" : "RelocateLockedDockResult",
+      "scope" : "dockflow.presets.apply",
+      "symbol" : "relocateLockedDock"
+    },
+    {
+      "id" : "dockflow.lockdock.settings.open",
+      "input" : "Void",
+      "method" : "openLockDockSettings",
+      "mutation" : false,
+      "output" : "Void",
+      "scope" : "dockflow.presets.apply",
+      "symbol" : "openLockDockSettings"
     }
   ],
   "contractID" : "com.appit.dockflow.presets",
-  "contractVersion" : "1.0.0",
+  "contractVersion" : "1.1.0",
   "events" : [
     {
       "id" : "dockflow.presets.changed",
@@ -129,6 +147,34 @@
       ],
       "kind" : "struct",
       "name" : "ApplyPresetResult"
+    },
+    {
+      "cases" : [
+        "moved",
+        "alreadyThere",
+        "lockDockOff",
+        "needsAccessibility",
+        "singleDisplay",
+        "displayMissing",
+        "busy",
+        "rejected"
+      ],
+      "kind" : "enum",
+      "name" : "RelocateLockedDockOutcome"
+    },
+    {
+      "fields" : [
+        {
+          "name" : "outcome",
+          "type" : "RelocateLockedDockOutcome"
+        },
+        {
+          "name" : "message",
+          "type" : "String?"
+        }
+      ],
+      "kind" : "struct",
+      "name" : "RelocateLockedDockResult"
     }
   ]
 }

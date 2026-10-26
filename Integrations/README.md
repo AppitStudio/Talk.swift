@@ -4,7 +4,7 @@ Build a feature against an app's public Talk contract without access to its sour
 
 | App | Public contract | Guide |
 | --- | --- | --- |
-| DockFlow | List/read/apply presets; observe changes | [DockFlow](dockflow/GUIDE.md) |
+| DockFlow | List/read/apply presets; observe changes; move the Dock to its Lock Dock display (1.1) | [DockFlow](dockflow/GUIDE.md) |
 | ExtraDock (4 and 5) | List docks with visibility/metadata; show, hide, toggle or release docks; observe changes | [ExtraDock](extradock/GUIDE.md) |
 
 Read a provider guide to implement calls to that app. Apps that only consume Talk APIs do not publish an entry here; for example, ExtraBar uses the DockFlow guide. An app that both supplies and consumes actions may publish a guide for its own public contract. These are documentation entries, not an app store, publisher verification service or SDK runtime registry. A listing grants neither installation trust nor permissions.

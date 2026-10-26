@@ -5,9 +5,13 @@ import Talk
 /// Integration primitives for an app-owned coordinator, not a complete app.
 /// Register talk-spike-consumer and forward URLs to the retained resolver AND
 /// PairingDiscovery. Save consent using IntegrationStore before calling this.
+/// Set `lockDock` to also require the contract 1.1 Lock Dock actions (DockFlow 1.89+,
+/// apply scope). Against an older DockFlow that negotiation throws ContractDiagnostic:
+/// call again with `lockDock: false` and hide the Lock Dock feature.
 @MainActor
 public func connectDockFlow(
-    record: PairingRecord, resolver: EndpointResolver, callbackBundleID: String
+    record: PairingRecord, resolver: EndpointResolver, callbackBundleID: String,
+    lockDock: Bool = false
 ) async throws -> DockFlowPresetsClient {
     guard record.providerBundleID == DockFlowRouting.providerBundleID,
           record.permits("dockflow.presets.read"),
@@ -21,7 +25,13 @@ public func connectDockFlow(
     let transport = try TalkClient(port: port, credential: record.credential)
     var actions: Set<String> = [DockFlowPresetsAPI.read]
     var events: Set<String> = []
-    if record.permits("dockflow.presets.apply") { actions.insert(DockFlowPresetsAPI.apply) }
+    if record.permits("dockflow.presets.apply") {
+        actions.insert(DockFlowPresetsAPI.apply)
+        if lockDock {
+            actions.insert(DockFlowPresetsAPI.relocateLockedDock)
+            actions.insert(DockFlowPresetsAPI.openLockDockSettings)
+        }
+    }
     if record.permits("dockflow.presets.observe") {
         actions.insert(DockFlowPresetsAPI.observe)
         events.insert(DockFlowPresetsAPI.changed)
@@ -47,6 +57,16 @@ public func applyDockFlowPreset(
 ) async throws -> ApplyPresetResult {
     guard record.permits("dockflow.presets.apply") else { throw TalkError.permissionDenied }
     return try await client.applyPreset(ApplyPresetRequest(id: id), timeout: 20)
+}
+
+/// Contract 1.1: move the Dock back to its Lock Dock display. Requires a client connected
+/// with `lockDock: true`. `moved` means the move started. For lockDockOff or
+/// needsAccessibility, offer `client.openLockDockSettings()`. Never replay automatically.
+public func relocateDockFlowLockedDock(
+    client: DockFlowPresetsClient, record: PairingRecord
+) async throws -> RelocateLockedDockResult {
+    guard record.permits("dockflow.presets.apply") else { throw TalkError.permissionDenied }
+    return try await client.relocateLockedDock()
 }
 
 /// The coordinator owns/cancels this task and marks disconnection on return.
