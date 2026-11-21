@@ -27,8 +27,16 @@ another installed app does not manufacture a feature in the consumer.
 
 ```swift
 let identity = AppIdentity(bundleID: "com.example.Provider", teamID: "ABCDE12345")
-let installation = IntegrationDiscovery.installation(for: identity, role: .provider)
+// From a panel: runs off the main actor; show "Checking…" until it returns.
+let installation = await IntegrationDiscovery.resolveInstallation(for: identity, role: .provider)
 ```
+
+`IntegrationDiscovery.installation(for:role:)` is the same check on the main
+actor. It validates the selected copy's whole code signature, which takes tens
+of milliseconds per app (more on a cold disk), so a settings panel that calls it
+on appearance freezes after its first frame. Prefer `resolveInstallation`, apply
+its result on the main actor, and drop results from checks that a newer one
+superseded.
 
 Inspect on panel appearance and relevant workspace changes. The SDK reports
 `available`, `notInstalled`, `updateRequired`, `ambiguousInstallation`, or

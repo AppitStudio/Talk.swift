@@ -15,8 +15,31 @@ public enum IntegrationDiscovery {
     /// Call on panel appearance and workspace launch/termination notifications.
     /// Library entries must come from features the host actually implements;
     /// a discovered contract alone does not create a supported integration.
+    ///
+    /// This blocks the main actor while it reads LaunchServices and validates the
+    /// selected copy's whole code signature: tens of milliseconds per app, more
+    /// on a cold disk. Panels and other UI should use
+    /// ``resolveInstallation(for:role:)`` instead.
     @MainActor
     public static func installation(for identity: AppIdentity, role: Role = .provider) -> Installation {
+        inspectInstallation(for: identity, role: role)
+    }
+
+    /// The same passive check as ``installation(for:role:)``, run off the main
+    /// actor so a panel can draw (with a "Checking…" placeholder) while it runs.
+    /// It never launches the app, requests consent, or grants access. Apply the
+    /// result on the main actor; a later result supersedes an earlier one, so
+    /// ignore results from checks that were started before the newest one.
+    public static func resolveInstallation(for identity: AppIdentity, role: Role = .provider) async -> Installation {
+        await Task.detached(priority: .userInitiated) {
+            inspectInstallation(for: identity, role: role)
+        }.value
+    }
+
+    /// Thread-safe: LaunchServices and bundle reads, the bundle-ID-scoped
+    /// running-application query (never the workspace-wide list), and a static
+    /// code-signature check.
+    nonisolated static func inspectInstallation(for identity: AppIdentity, role: Role) -> Installation {
         let scheme = role == .provider ? "talk-spike-provider" : "talk-spike-consumer"
         let candidates = NSWorkspace.shared.urlsForApplications(withBundleIdentifier: identity.bundleID).filter {
             FileManager.default.fileExists(atPath: $0.path)

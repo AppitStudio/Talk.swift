@@ -51,7 +51,9 @@ public struct AuthenticatedAppMessage: Sendable {
 /// read-only Apple-event audit token independently authenticates each message.
 /// No credentials are sent through this route.
 @MainActor enum AuthenticatedAppRouting {
-    static func inspect(applicationURL: URL, identity: AppIdentity) throws {
+    /// Thread-safe: reads the bundle and its static signature only, so passive
+    /// discovery can run it off the main actor.
+    nonisolated static func inspect(applicationURL: URL, identity: AppIdentity) throws {
         guard applicationURL.isFileURL,
               applicationURL.pathExtension.lowercased() == "app",
               Bundle(url: applicationURL)?.bundleIdentifier == identity.bundleID else {
@@ -149,7 +151,7 @@ public struct AuthenticatedAppMessage: Sendable {
         return descriptor.data
     }
 
-    static func requirement(for identity: AppIdentity) throws -> SecRequirement {
+    nonisolated static func requirement(for identity: AppIdentity) throws -> SecRequirement {
         guard PairingRouting.validBundleID(identity.bundleID),
               !identity.teamID.isEmpty, identity.teamID.utf8.count <= 64,
               identity.teamID.utf8.allSatisfy({ (65...90).contains($0) || (97...122).contains($0) || (48...57).contains($0) }) else {
@@ -209,7 +211,7 @@ public struct AuthenticatedAppMessage: Sendable {
         return identity
     }
 
-    private static func signingIdentity(of code: SecStaticCode) throws -> AppIdentity {
+    nonisolated private static func signingIdentity(of code: SecStaticCode) throws -> AppIdentity {
         var information: CFDictionary?
         guard SecCodeCopySigningInformation(code, SecCSFlags(rawValue: kSecCSSigningInformation), &information) == errSecSuccess,
               let values = information as? [String: Any],
